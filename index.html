@@ -197,6 +197,22 @@
     <!-- Import File Input (hidden) -->
     <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="handleImportFile(event)">
 
+    <!-- Modal Container -->
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="modal-title">Tytuł</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <!-- Dynamic buttons -->
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="./js/storage.js"></script>
     <script src="./js/app.js"></script>
