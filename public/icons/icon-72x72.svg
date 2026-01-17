@@ -1,0 +1,17 @@
+<svg width="72" height="72" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#004F5D;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#007380;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+    <rect width="72" height="72" fill="url(#grad)" rx="9" />
+    <g transform="translate(18, 18)">
+        <text x="50%" y="40%" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#00E5FF">
+            INOVIT
+        </text>
+        <text x="50%" y="70%" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">
+            HACCP
+        </text>
+    </g>
+</svg>
