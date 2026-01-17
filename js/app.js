@@ -19,25 +19,29 @@ let appData = {
 
 // Page navigation
 function showPage(pageId) {
-    // Hide all pages
-    const pages = document.querySelectorAll('.welcome-page, #dashboard, .content-page');
-    pages.forEach(page => {
+    console.log('[App] Showing page:', pageId);
+
+    // Hide all static pages (welcome and dashboard)
+    const staticPages = document.querySelectorAll('#welcome, #dashboard');
+    staticPages.forEach(page => {
         page.classList.add('page-hidden');
     });
 
+    // Clear dynamic content container
+    const contentContainer = document.getElementById('content-container');
+
     // Show selected page
-    let targetPage = document.getElementById(pageId);
-
-    // If page doesn't exist in DOM, load it
-    if (!targetPage && pageId !== 'welcome' && pageId !== 'dashboard') {
+    if (pageId === 'welcome' || pageId === 'dashboard') {
+        // Static pages - clear dynamic content and show static page
+        contentContainer.innerHTML = '';
+        let targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.classList.remove('page-hidden');
+            currentPage = pageId;
+        }
+    } else {
+        // Dynamic pages - load into content container
         loadContentPage(pageId);
-        return;
-    }
-
-    if (targetPage) {
-        targetPage.classList.remove('page-hidden');
-        targetPage.classList.add('fade-in-up');
-        currentPage = pageId;
     }
 
     // Update browser URL without reloading
