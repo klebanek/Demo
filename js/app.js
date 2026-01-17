@@ -21,23 +21,45 @@ let appData = {
 function showPage(pageId) {
     console.log('[App] Showing page:', pageId);
 
+    // Get content container
+    const contentContainer = document.getElementById('content-container');
+
     // Hide all static pages (welcome and dashboard)
-    const staticPages = document.querySelectorAll('#welcome, #dashboard');
-    staticPages.forEach(page => {
-        page.classList.add('page-hidden');
-    });
+    const welcomePage = document.getElementById('welcome');
+    const dashboardPage = document.getElementById('dashboard');
+
+    if (welcomePage) {
+        welcomePage.classList.add('page-hidden');
+    }
+    if (dashboardPage) {
+        dashboardPage.classList.add('page-hidden');
+    }
 
     // Clear dynamic content container
-    const contentContainer = document.getElementById('content-container');
+    if (contentContainer) {
+        contentContainer.innerHTML = '';
+    }
 
     // Show selected page
     if (pageId === 'welcome' || pageId === 'dashboard') {
-        // Static pages - clear dynamic content and show static page
-        contentContainer.innerHTML = '';
-        let targetPage = document.getElementById(pageId);
+        // Static pages - show the target page
+        const targetPage = document.getElementById(pageId);
         if (targetPage) {
             targetPage.classList.remove('page-hidden');
+
+            // Force animation restart
+            const animatedElement = targetPage.querySelector('.fade-in-up') || targetPage;
+            if (animatedElement.classList.contains('fade-in-up')) {
+                animatedElement.classList.remove('fade-in-up');
+                // Force reflow to restart animation
+                void animatedElement.offsetWidth;
+                animatedElement.classList.add('fade-in-up');
+            }
+
             currentPage = pageId;
+            console.log('[App] Showing static page:', pageId);
+        } else {
+            console.error('[App] Target page not found:', pageId);
         }
     } else {
         // Dynamic pages - load into content container
@@ -48,6 +70,9 @@ function showPage(pageId) {
     if (history.pushState) {
         history.pushState(null, null, '#' + pageId);
     }
+
+    // Scroll to top
+    window.scrollTo(0, 0);
 }
 
 // Load content pages dynamically
@@ -890,18 +915,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Handle browser back/forward
     window.addEventListener('popstate', function() {
         const hash = window.location.hash.substring(1);
-        if (hash) {
+        if (hash && isValidPage(hash)) {
             showPage(hash);
         } else {
             showPage('welcome');
         }
     });
-
-    // Set initial page from URL
-    const initialHash = window.location.hash.substring(1);
-    if (initialHash) {
-        showPage(initialHash);
-    }
 
     // Add CSS animations
     const style = document.createElement('style');
@@ -917,5 +936,33 @@ document.addEventListener('DOMContentLoaded', async function() {
     `;
     document.head.appendChild(style);
 
+    // Set initial page from URL or show welcome
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash && isValidPage(initialHash)) {
+        showPage(initialHash);
+    } else {
+        // Explicitly show welcome page
+        showPage('welcome');
+    }
+
     console.log('[App] INOVIT HACCP PWA initialized successfully');
 });
+
+// Check if page ID is valid
+function isValidPage(pageId) {
+    const validPages = [
+        'welcome',
+        'dashboard',
+        'wprowadzenie',
+        'opis-zakladu',
+        'ghp-gmp',
+        'schemat',
+        'analiza',
+        'rejestry',
+        'korekty',
+        'szkolenia',
+        'audyty',
+        'badania'
+    ];
+    return validPages.includes(pageId);
+}
