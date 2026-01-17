@@ -1,11 +1,11 @@
 const CACHE_NAME = 'inovit-haccp-v1.0.0';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/css/styles.css',
-  '/js/app.js',
-  '/js/storage.js',
-  '/manifest.json',
+  './',
+  './index.html',
+  './css/styles.css',
+  './js/app.js',
+  './js/storage.js',
+  './manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
@@ -70,7 +70,7 @@ self.addEventListener('fetch', event => {
       })
       .catch(() => {
         // If both cache and network fail, show offline page
-        return caches.match('/index.html');
+        return caches.match('./index.html');
       })
   );
 });
@@ -92,8 +92,8 @@ async function syncData() {
 self.addEventListener('push', event => {
   const options = {
     body: event.data ? event.data.text() : 'Nowe powiadomienie z INOVIT HACCP',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: './icons/icon-192x192.png',
+    badge: './icons/icon-72x72.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
@@ -103,12 +103,12 @@ self.addEventListener('push', event => {
       {
         action: 'explore',
         title: 'Otwórz',
-        icon: '/icons/icon-96x96.png'
+        icon: './icons/icon-96x96.png'
       },
       {
         action: 'close',
         title: 'Zamknij',
-        icon: '/icons/icon-96x96.png'
+        icon: './icons/icon-96x96.png'
       }
     ]
   };
@@ -124,7 +124,7 @@ self.addEventListener('notificationclick', event => {
 
   if (event.action === 'explore') {
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow('./')
     );
   }
 });
