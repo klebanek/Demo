@@ -222,42 +222,11 @@ function getGHPPage() {
                         <tr>
                             <th>Procedura</th>
                             <th>Status</th>
-                            <th>Data ostatniej aktualizacji</th>
+                            <th>Data aktualizacji</th>
                             <th>Akcje</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Higiena personelu</td>
-                            <td><span class="status status-completed">Ukończone</span></td>
-                            <td>2025-01-15</td>
-                            <td><button class="btn btn-small" onclick="editProcedure(1)">Edytuj</button></td>
-                        </tr>
-                        <tr>
-                            <td>Mycie i dezynfekcja</td>
-                            <td><span class="status status-pending">W trakcie</span></td>
-                            <td>2025-01-10</td>
-                            <td><button class="btn btn-small" onclick="editProcedure(2)">Edytuj</button></td>
-                        </tr>
-                        <tr>
-                            <td>Kontrola szkodników</td>
-                            <td><span class="status status-overdue">Opóźnione</span></td>
-                            <td>2024-12-20</td>
-                            <td><button class="btn btn-small" onclick="editProcedure(3)">Edytuj</button></td>
-                        </tr>
-                        <tr>
-                            <td>Jakość wody</td>
-                            <td><span class="status status-completed">Ukończone</span></td>
-                            <td>2025-01-12</td>
-                            <td><button class="btn btn-small" onclick="editProcedure(4)">Edytuj</button></td>
-                        </tr>
-                        <tr>
-                            <td>Gospodarowanie odpadami</td>
-                            <td><span class="status status-pending">W trakcie</span></td>
-                            <td>2025-01-08</td>
-                            <td><button class="btn btn-small" onclick="editProcedure(5)">Edytuj</button></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="procedures-tbody"></tbody>
                 </table>
             </div>
 
@@ -281,38 +250,12 @@ function getSchemaPage() {
             <div class="form-section">
                 <h4>Przepływ procesu produkcyjnego</h4>
                 <div style="background: #f8f9fa; padding: 30px; border-radius: 8px; text-align: center;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                        <div style="background: var(--secondary-color); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
-                            PRZYJĘCIE SUROWCA
-                        </div>
-                        <div style="font-size: 24px; color: var(--secondary-color);">↓</div>
-                        <div style="background: var(--secondary-color); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
-                            PRZECHOWYWANIE
-                        </div>
-                        <div style="font-size: 24px; color: var(--secondary-color);">↓</div>
-                        <div style="background: var(--secondary-color); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
-                            PRZYGOTOWANIE
-                        </div>
-                        <div style="font-size: 24px; color: var(--secondary-color);">↓</div>
-                        <div style="background: var(--danger-color); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
-                            OBRÓBKA TERMICZNA (CCP)
-                        </div>
-                        <div style="font-size: 24px; color: var(--secondary-color);">↓</div>
-                        <div style="background: var(--secondary-color); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
-                            CHŁODZENIE
-                        </div>
-                        <div style="font-size: 24px; color: var(--secondary-color);">↓</div>
-                        <div style="background: var(--secondary-color); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
-                            PAKOWANIE
-                        </div>
-                        <div style="font-size: 24px; color: var(--secondary-color);">↓</div>
-                        <div style="background: var(--success-color); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold;">
-                            WYDANIE PRODUKTU
-                        </div>
+                    <div id="flowchart-container" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                        <!-- Dynamic content loaded by loadFlowChartDisplay() -->
                     </div>
                 </div>
 
-                <button class="btn" onclick="editFlowChart()">
+                <button class="btn" onclick="editFlowChart()" style="margin-top: 20px;">
                     <i class="fas fa-edit"></i> Edytuj schemat
                 </button>
             </div>
@@ -332,52 +275,21 @@ function getHazardAnalysisPage() {
 
             <div class="form-section">
                 <h4>Matryca analizy zagrożeń</h4>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Etap procesu</th>
-                            <th>Zagrożenie</th>
-                            <th>Typ zagrożenia</th>
-                            <th>Prawdopodobieństwo</th>
-                            <th>Skutki</th>
-                            <th>Ryzyko</th>
-                            <th>CCP</th>
-                            <th>Akcje</th>
-                        </tr>
-                    </thead>
-                    <tbody id="hazards-table">
-                        <tr>
-                            <td>Przyjęcie surowca</td>
-                            <td>Zanieczyszczenie mikrobiologiczne</td>
-                            <td>Biologiczne</td>
-                            <td>Średnie</td>
-                            <td>Wysokie</td>
-                            <td><span class="status status-warning">Wysokie</span></td>
-                            <td>TAK</td>
-                            <td><button class="btn btn-small" onclick="editHazard(1)">Edytuj</button></td>
-                        </tr>
-                        <tr>
-                            <td>Obróbka termiczna</td>
-                            <td>Niedogotowanie</td>
-                            <td>Biologiczne</td>
-                            <td>Niskie</td>
-                            <td>Wysokie</td>
-                            <td><span class="status status-danger">Krytyczne</span></td>
-                            <td>TAK</td>
-                            <td><button class="btn btn-small" onclick="editHazard(2)">Edytuj</button></td>
-                        </tr>
-                        <tr>
-                            <td>Przechowywanie</td>
-                            <td>Wzrost temperatury</td>
-                            <td>Fizyczne</td>
-                            <td>Średnie</td>
-                            <td>Średnie</td>
-                            <td><span class="status status-warning">Średnie</span></td>
-                            <td>NIE</td>
-                            <td><button class="btn btn-small" onclick="editHazard(3)">Edytuj</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Etap</th>
+                                <th>Zagrożenie</th>
+                                <th>Typ</th>
+                                <th>Ryzyko</th>
+                                <th>CCP</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hazards-tbody"></tbody>
+                    </table>
+                </div>
 
                 <button class="btn" onclick="addHazard()">
                     <i class="fas fa-plus"></i> Dodaj zagrożenie
@@ -639,7 +551,242 @@ async function loadPageData(pageId) {
     } else if (pageId === 'rejestry') {
         await loadTemperatureLog();
         await loadDeliveries();
+    } else if (pageId === 'ghp-gmp') {
+        await loadProceduresDisplay();
+    } else if (pageId === 'analiza') {
+        await loadHazardsDisplay();
+    } else if (pageId === 'korekty') {
+        await loadCorrectiveActionsDisplay();
+    } else if (pageId === 'szkolenia') {
+        await loadTrainingsDisplay();
+    } else if (pageId === 'audyty') {
+        await loadAuditsDisplay();
+    } else if (pageId === 'badania') {
+        await loadTestsDisplay();
+    } else if (pageId === 'schemat') {
+        await loadFlowChartDisplay();
     }
+}
+
+// Load display functions for dynamic pages
+async function loadProceduresDisplay() {
+    await loadProceduresData();
+    const tbody = document.getElementById('procedures-tbody');
+    if (!tbody) return;
+
+    const statusClass = (s) => s === 'Ukończone' ? 'status-completed' : s === 'Opóźnione' ? 'status-overdue' : 'status-pending';
+    tbody.innerHTML = proceduresData.length === 0
+        ? '<tr><td colspan="4" style="text-align:center;">Brak procedur</td></tr>'
+        : proceduresData.map(p => `
+            <tr>
+                <td>${p.name}</td>
+                <td><span class="status ${statusClass(p.status)}">${p.status}</span></td>
+                <td>${p.date || '-'}</td>
+                <td><button class="btn btn-small" onclick="editProcedure(${p.id})">Edytuj</button></td>
+            </tr>
+        `).join('');
+}
+
+async function loadHazardsDisplay() {
+    await loadHazardsData();
+    const tbody = document.getElementById('hazards-tbody');
+    if (!tbody) return;
+
+    const riskClass = (r) => r === 'Krytyczne' ? 'status-overdue' : r === 'Wysokie' ? 'status-warning' : 'status-completed';
+    tbody.innerHTML = hazardsData.length === 0
+        ? '<tr><td colspan="6" style="text-align:center;">Brak zagrożeń</td></tr>'
+        : hazardsData.map(h => `
+            <tr>
+                <td>${h.stage}</td>
+                <td>${h.hazard}</td>
+                <td>${h.type}</td>
+                <td><span class="status ${riskClass(h.risk)}">${h.risk}</span></td>
+                <td>${h.ccp}</td>
+                <td><button class="btn btn-small" onclick="editHazard(${h.id})">Edytuj</button></td>
+            </tr>
+        `).join('');
+}
+
+async function loadCorrectiveActionsDisplay() {
+    const actions = await storage.load('correctiveActions') || [];
+    const tbody = document.getElementById('corrective-actions-table');
+    if (!tbody) return;
+
+    const statusClass = (s) => s === 'Zamknięte' ? 'status-completed' : s === 'Otwarte' ? 'status-overdue' : 'status-pending';
+    tbody.innerHTML = actions.length === 0
+        ? '<tr><td colspan="8" style="text-align:center;">Brak działań korygujących</td></tr>'
+        : actions.map((a, i) => `
+            <tr>
+                <td>${a.date}</td>
+                <td>${a.problem}</td>
+                <td>${a.ccp}</td>
+                <td>${a.actionTaken}</td>
+                <td>${a.responsible}</td>
+                <td><span class="status ${statusClass(a.status)}">${a.status}</span></td>
+                <td>${a.closeDate}</td>
+                <td><button class="btn btn-small" onclick="viewCorrectiveAction(${i})">Szczegóły</button></td>
+            </tr>
+        `).join('');
+}
+
+async function loadTrainingsDisplay() {
+    const trainings = await storage.load('trainings') || [];
+    const tbody = document.getElementById('trainings-table');
+    if (!tbody) return;
+
+    const statusClass = (s) => s === 'Zrealizowane' ? 'status-completed' : s === 'Anulowane' ? 'status-overdue' : 'status-pending';
+    tbody.innerHTML = trainings.length === 0
+        ? '<tr><td colspan="6" style="text-align:center;">Brak szkoleń</td></tr>'
+        : trainings.map((t, i) => `
+            <tr>
+                <td>${t.topic}</td>
+                <td>${t.date}</td>
+                <td>${t.trainer}</td>
+                <td>${t.participants}</td>
+                <td><span class="status ${statusClass(t.status)}">${t.status}</span></td>
+                <td><button class="btn btn-small" onclick="viewTraining(${i})">Szczegóły</button></td>
+            </tr>
+        `).join('');
+}
+
+async function loadAuditsDisplay() {
+    const audits = await storage.load('audits') || [];
+    const tbody = document.getElementById('audits-table');
+    if (!tbody) return;
+
+    const resultClass = (r) => r === 'Pozytywny' ? 'status-completed' : r === 'Negatywny' ? 'status-overdue' : 'status-pending';
+    tbody.innerHTML = audits.length === 0
+        ? '<tr><td colspan="7" style="text-align:center;">Brak audytów</td></tr>'
+        : audits.map((a, i) => `
+            <tr>
+                <td>${a.type}</td>
+                <td>${a.date}</td>
+                <td>${a.auditor}</td>
+                <td>${a.area}</td>
+                <td><span class="status ${resultClass(a.result)}">${a.result}</span></td>
+                <td>${a.notes || '-'}</td>
+                <td><button class="btn btn-small" onclick="viewAudit(${i})">Szczegóły</button></td>
+            </tr>
+        `).join('');
+}
+
+async function loadTestsDisplay() {
+    const tests = await storage.load('tests') || [];
+    const tbody = document.getElementById('tests-table');
+    if (!tbody) return;
+
+    const statusClass = (s) => s === 'Aktualne' ? 'status-completed' : s === 'Przeterminowane' ? 'status-overdue' : 'status-pending';
+    tbody.innerHTML = tests.length === 0
+        ? '<tr><td colspan="8" style="text-align:center;">Brak badań</td></tr>'
+        : tests.map((t, i) => `
+            <tr>
+                <td>${t.type}</td>
+                <td>${t.material}</td>
+                <td>${t.frequency}</td>
+                <td>${t.lab}</td>
+                <td>${t.lastTest}</td>
+                <td>${t.nextTest}</td>
+                <td><span class="status ${statusClass(t.status)}">${t.status}</span></td>
+                <td><button class="btn btn-small" onclick="viewTest(${i})">Szczegóły</button></td>
+            </tr>
+        `).join('');
+}
+
+async function loadFlowChartDisplay() {
+    await loadFlowChartData();
+    const container = document.getElementById('flowchart-container');
+    if (!container) return;
+
+    container.innerHTML = flowChartSteps.map((step, i) => {
+        const isCcp = step.includes('(CCP)');
+        const isFirst = i === 0;
+        const isLast = i === flowChartSteps.length - 1;
+        const bgColor = isCcp ? 'var(--danger-color)' : isLast ? 'var(--success-color)' : 'var(--secondary-color)';
+
+        return `
+            ${i > 0 ? '<div style="font-size:24px;color:var(--secondary-color);">↓</div>' : ''}
+            <div style="background:${bgColor};color:white;padding:15px 30px;border-radius:8px;font-weight:bold;min-width:200px;">
+                ${step}
+            </div>
+        `;
+    }).join('');
+}
+
+// View detail functions for tables
+async function viewCorrectiveAction(index) {
+    const actions = await storage.load('correctiveActions') || [];
+    const a = actions[index];
+    if (!a) return;
+
+    openModal('Działanie korygujące', `
+        <div class="detail-grid">
+            <div class="detail-item"><label>Data</label><span>${a.date}</span></div>
+            <div class="detail-item"><label>CCP</label><span>${a.ccp}</span></div>
+            <div class="detail-item"><label>Status</label><span class="status ${a.status === 'Zamknięte' ? 'status-completed' : 'status-pending'}">${a.status}</span></div>
+            <div class="detail-item"><label>Odpowiedzialny</label><span>${a.responsible}</span></div>
+        </div>
+        <div style="margin-top:15px;padding:12px;background:var(--light-bg);border-radius:8px;">
+            <label style="display:block;font-size:12px;color:#666;text-transform:uppercase;margin-bottom:4px;">Problem</label>
+            <span>${a.problem}</span>
+        </div>
+        <div style="margin-top:10px;padding:12px;background:var(--light-bg);border-radius:8px;">
+            <label style="display:block;font-size:12px;color:#666;text-transform:uppercase;margin-bottom:4px;">Podjęte działanie</label>
+            <span>${a.actionTaken}</span>
+        </div>
+    `, `<button class="btn btn-secondary" onclick="closeModal()">Zamknij</button>`);
+}
+
+async function viewTraining(index) {
+    const trainings = await storage.load('trainings') || [];
+    const t = trainings[index];
+    if (!t) return;
+
+    openModal('Szczegóły szkolenia', `
+        <div class="detail-grid">
+            <div class="detail-item"><label>Temat</label><span>${t.topic}</span></div>
+            <div class="detail-item"><label>Data</label><span>${t.date}</span></div>
+            <div class="detail-item"><label>Prowadzący</label><span>${t.trainer}</span></div>
+            <div class="detail-item"><label>Uczestnicy</label><span>${t.participants}</span></div>
+            <div class="detail-item"><label>Status</label><span class="status ${t.status === 'Zrealizowane' ? 'status-completed' : 'status-pending'}">${t.status}</span></div>
+        </div>
+        ${t.notes ? `<div style="margin-top:15px;padding:12px;background:var(--light-bg);border-radius:8px;"><label style="display:block;font-size:12px;color:#666;text-transform:uppercase;margin-bottom:4px;">Uwagi</label><span>${t.notes}</span></div>` : ''}
+    `, `<button class="btn btn-secondary" onclick="closeModal()">Zamknij</button>`);
+}
+
+async function viewAudit(index) {
+    const audits = await storage.load('audits') || [];
+    const a = audits[index];
+    if (!a) return;
+
+    openModal('Szczegóły audytu', `
+        <div class="detail-grid">
+            <div class="detail-item"><label>Typ</label><span>${a.type}</span></div>
+            <div class="detail-item"><label>Data</label><span>${a.date}</span></div>
+            <div class="detail-item"><label>Audytor</label><span>${a.auditor}</span></div>
+            <div class="detail-item"><label>Obszar</label><span>${a.area}</span></div>
+            <div class="detail-item"><label>Wynik</label><span class="status ${a.result === 'Pozytywny' ? 'status-completed' : 'status-pending'}">${a.result}</span></div>
+            <div class="detail-item"><label>Niezgodności</label><span>${a.findings}</span></div>
+        </div>
+        ${a.notes ? `<div style="margin-top:15px;padding:12px;background:var(--light-bg);border-radius:8px;"><label style="display:block;font-size:12px;color:#666;text-transform:uppercase;margin-bottom:4px;">Uwagi</label><span>${a.notes}</span></div>` : ''}
+    `, `<button class="btn btn-secondary" onclick="closeModal()">Zamknij</button>`);
+}
+
+async function viewTest(index) {
+    const tests = await storage.load('tests') || [];
+    const t = tests[index];
+    if (!t) return;
+
+    openModal('Szczegóły badania', `
+        <div class="detail-grid">
+            <div class="detail-item"><label>Typ</label><span>${t.type}</span></div>
+            <div class="detail-item"><label>Materiał</label><span>${t.material}</span></div>
+            <div class="detail-item"><label>Częstotliwość</label><span>${t.frequency}</span></div>
+            <div class="detail-item"><label>Laboratorium</label><span>${t.lab}</span></div>
+            <div class="detail-item"><label>Ostatnie</label><span>${t.lastTest}</span></div>
+            <div class="detail-item"><label>Następne</label><span>${t.nextTest}</span></div>
+            <div class="detail-item"><label>Status</label><span class="status ${t.status === 'Aktualne' ? 'status-completed' : 'status-pending'}">${t.status}</span></div>
+        </div>
+    `, `<button class="btn btn-secondary" onclick="closeModal()">Zamknij</button>`);
 }
 
 async function loadTemperatureLog() {
@@ -727,9 +874,6 @@ async function deleteTemperatureRecord(index) {
     loadTemperatureLog();
 }
 
-async function addDelivery() {
-    showNotification('Funkcja dodawania dostaw - użyj przycisku "Dodaj dostawę" aby wprowadzić dane', 'info');
-}
 
 // Export/Import functions
 async function exportData() {
@@ -838,45 +982,699 @@ Wszystkie dane przechowywane bezpiecznie na Twoim urządzeniu
     alert(helpText);
 }
 
-// Placeholder functions
-function addProcedure() {
-    showNotification('Funkcja dodawania procedur - w pełnej wersji dostępna pełna edycja', 'info');
+// ==================== MODAL SYSTEM ====================
+
+function openModal(title, bodyContent, footerContent) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = bodyContent;
+    document.getElementById('modal-footer').innerHTML = footerContent;
+    document.getElementById('modal-overlay').classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 
-function editProcedure(id) {
-    showNotification(`Edycja procedury #${id} - funkcja w rozwoju`, 'info');
+function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function closeModalOnOverlay(event) {
+    if (event.target === event.currentTarget) {
+        closeModal();
+    }
+}
+
+// ==================== DELIVERIES CRUD ====================
+
+async function addDelivery() {
+    const today = new Date().toISOString().split('T')[0];
+
+    const bodyContent = `
+        <div class="form-row">
+            <div class="form-group">
+                <label>Data dostawy *</label>
+                <input type="date" id="delivery-date" class="form-control" value="${today}" required>
+            </div>
+            <div class="form-group">
+                <label>Dostawca *</label>
+                <input type="text" id="delivery-supplier" class="form-control" placeholder="Nazwa dostawcy" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Produkt *</label>
+                <input type="text" id="delivery-product" class="form-control" placeholder="Nazwa produktu" required>
+            </div>
+            <div class="form-group">
+                <label>Ilość *</label>
+                <input type="text" id="delivery-quantity" class="form-control" placeholder="np. 10 kg, 5 szt." required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Temperatura przy odbiorze</label>
+                <input type="text" id="delivery-temperature" class="form-control" placeholder="np. 4°C">
+            </div>
+            <div class="form-group">
+                <label>Termin ważności</label>
+                <input type="date" id="delivery-expiry" class="form-control">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Ocena jakości</label>
+            <select id="delivery-quality" class="form-control">
+                <option value="Przyjęto">Przyjęto - zgodne</option>
+                <option value="Przyjęto warunkowo">Przyjęto warunkowo</option>
+                <option value="Odrzucono">Odrzucono</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Uwagi</label>
+            <textarea id="delivery-notes" class="form-control" rows="2" placeholder="Dodatkowe uwagi..."></textarea>
+        </div>
+    `;
+
+    const footerContent = `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveDelivery()"><i class="fas fa-save"></i> Zapisz</button>
+    `;
+
+    openModal('Nowa dostawa surowca', bodyContent, footerContent);
+}
+
+async function saveDelivery(editIndex = null) {
+    const date = document.getElementById('delivery-date').value;
+    const supplier = document.getElementById('delivery-supplier').value;
+    const product = document.getElementById('delivery-product').value;
+    const quantity = document.getElementById('delivery-quantity').value;
+
+    if (!date || !supplier || !product || !quantity) {
+        showNotification('Wypełnij wymagane pola (*)', 'warning');
+        return;
+    }
+
+    const delivery = {
+        date, supplier, product, quantity,
+        temperature: document.getElementById('delivery-temperature').value || '-',
+        expiryDate: document.getElementById('delivery-expiry').value || '-',
+        quality: document.getElementById('delivery-quality').value,
+        notes: document.getElementById('delivery-notes').value || '',
+        timestamp: new Date().toISOString()
+    };
+
+    const deliveries = await storage.load('deliveries') || [];
+
+    if (editIndex !== null) {
+        deliveries[editIndex] = { ...deliveries[editIndex], ...delivery };
+        showNotification('Dostawa zaktualizowana', 'success');
+    } else {
+        deliveries.push(delivery);
+        showNotification('Dostawa dodana', 'success');
+    }
+
+    await storage.save('deliveries', deliveries);
+    closeModal();
+    loadDeliveries();
+}
+
+async function viewDelivery(index) {
+    const deliveries = await storage.load('deliveries') || [];
+    const d = deliveries[index];
+    if (!d) { showNotification('Nie znaleziono dostawy', 'error'); return; }
+
+    const bodyContent = `
+        <div class="detail-grid">
+            <div class="detail-item"><label>Data</label><span>${d.date || '-'}</span></div>
+            <div class="detail-item"><label>Dostawca</label><span>${d.supplier || '-'}</span></div>
+            <div class="detail-item"><label>Produkt</label><span>${d.product || '-'}</span></div>
+            <div class="detail-item"><label>Ilość</label><span>${d.quantity || '-'}</span></div>
+            <div class="detail-item"><label>Temperatura</label><span>${d.temperature || '-'}</span></div>
+            <div class="detail-item"><label>Termin ważności</label><span>${d.expiryDate || '-'}</span></div>
+            <div class="detail-item"><label>Ocena</label><span class="status ${d.quality === 'Przyjęto' ? 'status-completed' : d.quality === 'Odrzucono' ? 'status-overdue' : 'status-pending'}">${d.quality}</span></div>
+            <div class="detail-item"><label>Wpis</label><span>${d.timestamp ? new Date(d.timestamp).toLocaleString('pl-PL') : '-'}</span></div>
+        </div>
+        ${d.notes ? `<div style="margin-top:15px;padding:12px;background:var(--light-bg);border-radius:8px;"><label style="display:block;font-size:12px;color:#666;text-transform:uppercase;margin-bottom:4px;">Uwagi</label><span>${d.notes}</span></div>` : ''}
+    `;
+
+    const footerContent = `
+        <button class="btn btn-danger" onclick="deleteDelivery(${index})"><i class="fas fa-trash"></i> Usuń</button>
+        <button class="btn" onclick="editDelivery(${index})"><i class="fas fa-edit"></i> Edytuj</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Zamknij</button>
+    `;
+
+    openModal('Dostawa #' + (index + 1), bodyContent, footerContent);
+}
+
+async function editDelivery(index) {
+    const deliveries = await storage.load('deliveries') || [];
+    const d = deliveries[index];
+    if (!d) { showNotification('Nie znaleziono dostawy', 'error'); return; }
+
+    const bodyContent = `
+        <div class="form-row">
+            <div class="form-group"><label>Data dostawy *</label><input type="date" id="delivery-date" class="form-control" value="${d.date || ''}" required></div>
+            <div class="form-group"><label>Dostawca *</label><input type="text" id="delivery-supplier" class="form-control" value="${d.supplier || ''}" required></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Produkt *</label><input type="text" id="delivery-product" class="form-control" value="${d.product || ''}" required></div>
+            <div class="form-group"><label>Ilość *</label><input type="text" id="delivery-quantity" class="form-control" value="${d.quantity || ''}" required></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Temperatura</label><input type="text" id="delivery-temperature" class="form-control" value="${d.temperature || ''}"></div>
+            <div class="form-group"><label>Termin ważności</label><input type="date" id="delivery-expiry" class="form-control" value="${d.expiryDate || ''}"></div>
+        </div>
+        <div class="form-group"><label>Ocena jakości</label>
+            <select id="delivery-quality" class="form-control">
+                <option value="Przyjęto" ${d.quality === 'Przyjęto' ? 'selected' : ''}>Przyjęto - zgodne</option>
+                <option value="Przyjęto warunkowo" ${d.quality === 'Przyjęto warunkowo' ? 'selected' : ''}>Przyjęto warunkowo</option>
+                <option value="Odrzucono" ${d.quality === 'Odrzucono' ? 'selected' : ''}>Odrzucono</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Uwagi</label><textarea id="delivery-notes" class="form-control" rows="2">${d.notes || ''}</textarea></div>
+    `;
+
+    const footerContent = `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveDelivery(${index})"><i class="fas fa-save"></i> Zapisz</button>
+    `;
+
+    openModal('Edytuj dostawę #' + (index + 1), bodyContent, footerContent);
+}
+
+async function deleteDelivery(index) {
+    if (!confirm('Usunąć tę dostawę?')) return;
+    const deliveries = await storage.load('deliveries') || [];
+    deliveries.splice(index, 1);
+    await storage.save('deliveries', deliveries);
+    closeModal();
+    showNotification('Dostawa usunięta', 'success');
+    loadDeliveries();
+}
+
+// ==================== PROCEDURES CRUD ====================
+
+let proceduresData = [
+    { id: 1, name: 'Higiena personelu', status: 'Ukończone', date: '2025-01-15', description: '' },
+    { id: 2, name: 'Mycie i dezynfekcja', status: 'W trakcie', date: '2025-01-10', description: '' },
+    { id: 3, name: 'Kontrola szkodników', status: 'Opóźnione', date: '2024-12-20', description: '' },
+    { id: 4, name: 'Jakość wody', status: 'Ukończone', date: '2025-01-12', description: '' },
+    { id: 5, name: 'Gospodarowanie odpadami', status: 'W trakcie', date: '2025-01-08', description: '' }
+];
+
+async function loadProceduresData() {
+    const saved = await storage.load('procedures');
+    if (saved && saved.length > 0) proceduresData = saved;
+}
+
+function addProcedure() {
+    const bodyContent = `
+        <div class="form-group"><label>Nazwa procedury *</label><input type="text" id="procedure-name" class="form-control" placeholder="np. Kontrola temperatury" required></div>
+        <div class="form-row">
+            <div class="form-group"><label>Status</label>
+                <select id="procedure-status" class="form-control">
+                    <option value="W trakcie">W trakcie</option>
+                    <option value="Ukończone">Ukończone</option>
+                    <option value="Opóźnione">Opóźnione</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Data aktualizacji</label><input type="date" id="procedure-date" class="form-control" value="${new Date().toISOString().split('T')[0]}"></div>
+        </div>
+        <div class="form-group"><label>Opis procedury</label><textarea id="procedure-description" class="form-control" rows="4" placeholder="Szczegółowy opis..."></textarea></div>
+    `;
+    openModal('Nowa procedura GHP/GMP', bodyContent, `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveProcedure()"><i class="fas fa-save"></i> Zapisz</button>
+    `);
+}
+
+async function saveProcedure(editId = null) {
+    const name = document.getElementById('procedure-name').value;
+    if (!name) { showNotification('Podaj nazwę procedury', 'warning'); return; }
+
+    const procedure = {
+        id: editId || Date.now(),
+        name,
+        status: document.getElementById('procedure-status').value,
+        date: document.getElementById('procedure-date').value,
+        description: document.getElementById('procedure-description').value || ''
+    };
+
+    await loadProceduresData();
+    if (editId) {
+        const idx = proceduresData.findIndex(p => p.id === editId);
+        if (idx !== -1) proceduresData[idx] = procedure;
+        showNotification('Procedura zaktualizowana', 'success');
+    } else {
+        proceduresData.push(procedure);
+        showNotification('Procedura dodana', 'success');
+    }
+
+    await storage.save('procedures', proceduresData);
+    closeModal();
+    if (currentPage === 'ghp-gmp') loadContentPage('ghp-gmp');
+}
+
+async function editProcedure(id) {
+    await loadProceduresData();
+    const p = proceduresData.find(x => x.id === id);
+    if (!p) { showNotification('Nie znaleziono procedury', 'error'); return; }
+
+    const bodyContent = `
+        <div class="form-group"><label>Nazwa procedury *</label><input type="text" id="procedure-name" class="form-control" value="${p.name || ''}" required></div>
+        <div class="form-row">
+            <div class="form-group"><label>Status</label>
+                <select id="procedure-status" class="form-control">
+                    <option value="W trakcie" ${p.status === 'W trakcie' ? 'selected' : ''}>W trakcie</option>
+                    <option value="Ukończone" ${p.status === 'Ukończone' ? 'selected' : ''}>Ukończone</option>
+                    <option value="Opóźnione" ${p.status === 'Opóźnione' ? 'selected' : ''}>Opóźnione</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Data aktualizacji</label><input type="date" id="procedure-date" class="form-control" value="${p.date || ''}"></div>
+        </div>
+        <div class="form-group"><label>Opis procedury</label><textarea id="procedure-description" class="form-control" rows="4">${p.description || ''}</textarea></div>
+    `;
+    openModal('Edytuj procedurę', bodyContent, `
+        <button class="btn btn-danger" onclick="deleteProcedure(${id})"><i class="fas fa-trash"></i> Usuń</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveProcedure(${id})"><i class="fas fa-save"></i> Zapisz</button>
+    `);
+}
+
+async function deleteProcedure(id) {
+    if (!confirm('Usunąć procedurę?')) return;
+    await loadProceduresData();
+    proceduresData = proceduresData.filter(p => p.id !== id);
+    await storage.save('procedures', proceduresData);
+    closeModal();
+    showNotification('Procedura usunięta', 'success');
+    if (currentPage === 'ghp-gmp') loadContentPage('ghp-gmp');
+}
+
+// ==================== HAZARDS CRUD ====================
+
+let hazardsData = [
+    { id: 1, stage: 'Przyjęcie surowca', hazard: 'Zanieczyszczenie mikrobiologiczne', type: 'Biologiczne', probability: 'Średnie', impact: 'Wysokie', risk: 'Wysokie', ccp: 'TAK', control: '' },
+    { id: 2, stage: 'Obróbka termiczna', hazard: 'Niedogotowanie', type: 'Biologiczne', probability: 'Niskie', impact: 'Wysokie', risk: 'Krytyczne', ccp: 'TAK', control: '' },
+    { id: 3, stage: 'Przechowywanie', hazard: 'Wzrost temperatury', type: 'Fizyczne', probability: 'Średnie', impact: 'Średnie', risk: 'Średnie', ccp: 'NIE', control: '' }
+];
+
+async function loadHazardsData() {
+    const saved = await storage.load('hazards');
+    if (saved && saved.length > 0) hazardsData = saved;
 }
 
 function addHazard() {
-    showNotification('Funkcja dodawania zagrożeń - w pełnej wersji dostępny pełny formularz', 'info');
+    const bodyContent = `
+        <div class="form-row">
+            <div class="form-group"><label>Etap procesu *</label><input type="text" id="hazard-stage" class="form-control" placeholder="np. Przyjęcie surowca" required></div>
+            <div class="form-group"><label>Typ</label>
+                <select id="hazard-type" class="form-control">
+                    <option value="Biologiczne">Biologiczne</option>
+                    <option value="Chemiczne">Chemiczne</option>
+                    <option value="Fizyczne">Fizyczne</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group"><label>Opis zagrożenia *</label><input type="text" id="hazard-name" class="form-control" placeholder="np. Zanieczyszczenie mikrobiologiczne" required></div>
+        <div class="form-row">
+            <div class="form-group"><label>Prawdopodobieństwo</label>
+                <select id="hazard-probability" class="form-control"><option>Niskie</option><option>Średnie</option><option>Wysokie</option></select>
+            </div>
+            <div class="form-group"><label>Skutki</label>
+                <select id="hazard-impact" class="form-control"><option>Niskie</option><option>Średnie</option><option>Wysokie</option></select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Ryzyko</label>
+                <select id="hazard-risk" class="form-control"><option>Niskie</option><option>Średnie</option><option>Wysokie</option><option>Krytyczne</option></select>
+            </div>
+            <div class="form-group"><label>CCP?</label>
+                <select id="hazard-ccp" class="form-control"><option value="NIE">NIE</option><option value="TAK">TAK</option></select>
+            </div>
+        </div>
+        <div class="form-group"><label>Środki kontroli</label><textarea id="hazard-control" class="form-control" rows="2" placeholder="Opisz środki kontroli..."></textarea></div>
+    `;
+    openModal('Nowe zagrożenie HACCP', bodyContent, `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveHazard()"><i class="fas fa-save"></i> Zapisz</button>
+    `);
 }
 
-function editHazard(id) {
-    showNotification(`Edycja zagrożenia #${id} - funkcja w rozwoju`, 'info');
+async function saveHazard(editId = null) {
+    const stage = document.getElementById('hazard-stage').value;
+    const name = document.getElementById('hazard-name').value;
+    if (!stage || !name) { showNotification('Wypełnij wymagane pola', 'warning'); return; }
+
+    const hazard = {
+        id: editId || Date.now(), stage, hazard: name,
+        type: document.getElementById('hazard-type').value,
+        probability: document.getElementById('hazard-probability').value,
+        impact: document.getElementById('hazard-impact').value,
+        risk: document.getElementById('hazard-risk').value,
+        ccp: document.getElementById('hazard-ccp').value,
+        control: document.getElementById('hazard-control').value || ''
+    };
+
+    await loadHazardsData();
+    if (editId) {
+        const idx = hazardsData.findIndex(h => h.id === editId);
+        if (idx !== -1) hazardsData[idx] = hazard;
+        showNotification('Zagrożenie zaktualizowane', 'success');
+    } else {
+        hazardsData.push(hazard);
+        showNotification('Zagrożenie dodane', 'success');
+    }
+
+    await storage.save('hazards', hazardsData);
+    closeModal();
+    if (currentPage === 'analiza') loadContentPage('analiza');
 }
 
-function addCorrectiveAction() {
-    showNotification('Funkcja zgłaszania działań korygujących - w pełnej wersji dostępny pełny formularz', 'info');
+async function editHazard(id) {
+    await loadHazardsData();
+    const h = hazardsData.find(x => x.id === id);
+    if (!h) { showNotification('Nie znaleziono zagrożenia', 'error'); return; }
+
+    const bodyContent = `
+        <div class="form-row">
+            <div class="form-group"><label>Etap procesu *</label><input type="text" id="hazard-stage" class="form-control" value="${h.stage || ''}" required></div>
+            <div class="form-group"><label>Typ</label>
+                <select id="hazard-type" class="form-control">
+                    <option value="Biologiczne" ${h.type === 'Biologiczne' ? 'selected' : ''}>Biologiczne</option>
+                    <option value="Chemiczne" ${h.type === 'Chemiczne' ? 'selected' : ''}>Chemiczne</option>
+                    <option value="Fizyczne" ${h.type === 'Fizyczne' ? 'selected' : ''}>Fizyczne</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group"><label>Opis zagrożenia *</label><input type="text" id="hazard-name" class="form-control" value="${h.hazard || ''}" required></div>
+        <div class="form-row">
+            <div class="form-group"><label>Prawdopodobieństwo</label>
+                <select id="hazard-probability" class="form-control">
+                    <option ${h.probability === 'Niskie' ? 'selected' : ''}>Niskie</option>
+                    <option ${h.probability === 'Średnie' ? 'selected' : ''}>Średnie</option>
+                    <option ${h.probability === 'Wysokie' ? 'selected' : ''}>Wysokie</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Skutki</label>
+                <select id="hazard-impact" class="form-control">
+                    <option ${h.impact === 'Niskie' ? 'selected' : ''}>Niskie</option>
+                    <option ${h.impact === 'Średnie' ? 'selected' : ''}>Średnie</option>
+                    <option ${h.impact === 'Wysokie' ? 'selected' : ''}>Wysokie</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Ryzyko</label>
+                <select id="hazard-risk" class="form-control">
+                    <option ${h.risk === 'Niskie' ? 'selected' : ''}>Niskie</option>
+                    <option ${h.risk === 'Średnie' ? 'selected' : ''}>Średnie</option>
+                    <option ${h.risk === 'Wysokie' ? 'selected' : ''}>Wysokie</option>
+                    <option ${h.risk === 'Krytyczne' ? 'selected' : ''}>Krytyczne</option>
+                </select>
+            </div>
+            <div class="form-group"><label>CCP?</label>
+                <select id="hazard-ccp" class="form-control">
+                    <option value="NIE" ${h.ccp === 'NIE' ? 'selected' : ''}>NIE</option>
+                    <option value="TAK" ${h.ccp === 'TAK' ? 'selected' : ''}>TAK</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group"><label>Środki kontroli</label><textarea id="hazard-control" class="form-control" rows="2">${h.control || ''}</textarea></div>
+    `;
+    openModal('Edytuj zagrożenie', bodyContent, `
+        <button class="btn btn-danger" onclick="deleteHazard(${id})"><i class="fas fa-trash"></i> Usuń</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveHazard(${id})"><i class="fas fa-save"></i> Zapisz</button>
+    `);
 }
 
-function addTraining() {
-    showNotification('Funkcja dodawania szkoleń - w pełnej wersji dostępny kalendarz i zarządzanie uczestnikami', 'info');
+async function deleteHazard(id) {
+    if (!confirm('Usunąć zagrożenie?')) return;
+    await loadHazardsData();
+    hazardsData = hazardsData.filter(h => h.id !== id);
+    await storage.save('hazards', hazardsData);
+    closeModal();
+    showNotification('Zagrożenie usunięte', 'success');
+    if (currentPage === 'analiza') loadContentPage('analiza');
 }
 
-function addAudit() {
-    showNotification('Funkcja planowania audytów - w pełnej wersji dostępny pełen system audytów', 'info');
+// ==================== CORRECTIVE ACTIONS CRUD ====================
+
+async function addCorrectiveAction() {
+    const today = new Date().toISOString().split('T')[0];
+    const bodyContent = `
+        <div class="form-row">
+            <div class="form-group"><label>Data zgłoszenia *</label><input type="date" id="action-date" class="form-control" value="${today}" required></div>
+            <div class="form-group"><label>Dotyczy CCP?</label>
+                <select id="action-ccp" class="form-control"><option value="NIE">NIE</option><option value="TAK">TAK</option></select>
+            </div>
+        </div>
+        <div class="form-group"><label>Opis problemu *</label><textarea id="action-problem" class="form-control" rows="2" placeholder="Opisz problem..." required></textarea></div>
+        <div class="form-group"><label>Podjęte działanie *</label><textarea id="action-taken" class="form-control" rows="2" placeholder="Opisz działanie korygujące..." required></textarea></div>
+        <div class="form-row">
+            <div class="form-group"><label>Osoba odpowiedzialna</label><input type="text" id="action-responsible" class="form-control" placeholder="Imię i nazwisko"></div>
+            <div class="form-group"><label>Status</label>
+                <select id="action-status" class="form-control"><option value="Otwarte">Otwarte</option><option value="W realizacji">W realizacji</option><option value="Zamknięte">Zamknięte</option></select>
+            </div>
+        </div>
+        <div class="form-group"><label>Data zamknięcia</label><input type="date" id="action-close-date" class="form-control"></div>
+    `;
+    openModal('Nowe działanie korygujące', bodyContent, `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveCorrectiveAction()"><i class="fas fa-save"></i> Zapisz</button>
+    `);
 }
 
-function addTest() {
-    showNotification('Funkcja dodawania badań - w pełnej wersji dostępny pełny plan badań', 'info');
+async function saveCorrectiveAction(editIndex = null) {
+    const date = document.getElementById('action-date').value;
+    const problem = document.getElementById('action-problem').value;
+    const taken = document.getElementById('action-taken').value;
+    if (!date || !problem || !taken) { showNotification('Wypełnij wymagane pola', 'warning'); return; }
+
+    const action = {
+        date, problem, ccp: document.getElementById('action-ccp').value, actionTaken: taken,
+        responsible: document.getElementById('action-responsible').value || '-',
+        status: document.getElementById('action-status').value,
+        closeDate: document.getElementById('action-close-date').value || '-',
+        timestamp: new Date().toISOString()
+    };
+
+    const actions = await storage.load('correctiveActions') || [];
+    if (editIndex !== null) { actions[editIndex] = { ...actions[editIndex], ...action }; showNotification('Zaktualizowano', 'success'); }
+    else { actions.push(action); showNotification('Dodano', 'success'); }
+
+    await storage.save('correctiveActions', actions);
+    closeModal();
+    if (currentPage === 'korekty') loadContentPage('korekty');
 }
 
-function editFlowChart() {
-    showNotification('Edytor schematu technologicznego - w pełnej wersji dostępny wizualny edytor', 'info');
+// ==================== TRAININGS CRUD ====================
+
+async function addTraining() {
+    const bodyContent = `
+        <div class="form-group"><label>Temat szkolenia *</label><input type="text" id="training-topic" class="form-control" placeholder="np. Higiena rąk" required></div>
+        <div class="form-row">
+            <div class="form-group"><label>Data *</label><input type="date" id="training-date" class="form-control" required></div>
+            <div class="form-group"><label>Prowadzący</label><input type="text" id="training-trainer" class="form-control" placeholder="Imię i nazwisko"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Liczba uczestników</label><input type="number" id="training-participants" class="form-control" min="0" value="0"></div>
+            <div class="form-group"><label>Status</label>
+                <select id="training-status" class="form-control"><option value="Planowane">Planowane</option><option value="Zrealizowane">Zrealizowane</option><option value="Anulowane">Anulowane</option></select>
+            </div>
+        </div>
+        <div class="form-group"><label>Uwagi</label><textarea id="training-notes" class="form-control" rows="2"></textarea></div>
+    `;
+    openModal('Nowe szkolenie', bodyContent, `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveTraining()"><i class="fas fa-save"></i> Zapisz</button>
+    `);
 }
 
-function viewDelivery(index) {
-    showNotification(`Podgląd dostawy #${index + 1} - funkcja w rozwoju`, 'info');
+async function saveTraining(editIndex = null) {
+    const topic = document.getElementById('training-topic').value;
+    const date = document.getElementById('training-date').value;
+    if (!topic || !date) { showNotification('Wypełnij wymagane pola', 'warning'); return; }
+
+    const training = {
+        topic, date, trainer: document.getElementById('training-trainer').value || '-',
+        participants: document.getElementById('training-participants').value || '0',
+        status: document.getElementById('training-status').value,
+        notes: document.getElementById('training-notes').value || '', timestamp: new Date().toISOString()
+    };
+
+    const trainings = await storage.load('trainings') || [];
+    if (editIndex !== null) { trainings[editIndex] = { ...trainings[editIndex], ...training }; showNotification('Zaktualizowano', 'success'); }
+    else { trainings.push(training); showNotification('Dodano', 'success'); }
+
+    await storage.save('trainings', trainings);
+    closeModal();
+    if (currentPage === 'szkolenia') loadContentPage('szkolenia');
+}
+
+// ==================== AUDITS CRUD ====================
+
+async function addAudit() {
+    const bodyContent = `
+        <div class="form-row">
+            <div class="form-group"><label>Typ audytu *</label>
+                <select id="audit-type" class="form-control"><option value="Wewnętrzny">Wewnętrzny</option><option value="Zewnętrzny">Zewnętrzny</option><option value="Certyfikacyjny">Certyfikacyjny</option></select>
+            </div>
+            <div class="form-group"><label>Data *</label><input type="date" id="audit-date" class="form-control" required></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Audytor</label><input type="text" id="audit-auditor" class="form-control" placeholder="Imię i nazwisko"></div>
+            <div class="form-group"><label>Obszar</label><input type="text" id="audit-area" class="form-control" placeholder="np. Produkcja"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Wynik</label>
+                <select id="audit-result" class="form-control"><option value="Planowany">Planowany</option><option value="Pozytywny">Pozytywny</option><option value="Warunkowo pozytywny">Warunkowo pozytywny</option><option value="Negatywny">Negatywny</option></select>
+            </div>
+            <div class="form-group"><label>Niezgodności</label><input type="number" id="audit-findings" class="form-control" min="0" value="0"></div>
+        </div>
+        <div class="form-group"><label>Uwagi</label><textarea id="audit-notes" class="form-control" rows="2"></textarea></div>
+    `;
+    openModal('Nowy audyt', bodyContent, `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveAudit()"><i class="fas fa-save"></i> Zapisz</button>
+    `);
+}
+
+async function saveAudit(editIndex = null) {
+    const type = document.getElementById('audit-type').value;
+    const date = document.getElementById('audit-date').value;
+    if (!type || !date) { showNotification('Wypełnij wymagane pola', 'warning'); return; }
+
+    const audit = {
+        type, date, auditor: document.getElementById('audit-auditor').value || '-',
+        area: document.getElementById('audit-area').value || '-', result: document.getElementById('audit-result').value,
+        findings: document.getElementById('audit-findings').value || '0',
+        notes: document.getElementById('audit-notes').value || '', timestamp: new Date().toISOString()
+    };
+
+    const audits = await storage.load('audits') || [];
+    if (editIndex !== null) { audits[editIndex] = { ...audits[editIndex], ...audit }; showNotification('Zaktualizowano', 'success'); }
+    else { audits.push(audit); showNotification('Dodano', 'success'); }
+
+    await storage.save('audits', audits);
+    closeModal();
+    if (currentPage === 'audyty') loadContentPage('audyty');
+}
+
+// ==================== TESTS CRUD ====================
+
+async function addTest() {
+    const bodyContent = `
+        <div class="form-row">
+            <div class="form-group"><label>Typ badania *</label>
+                <select id="test-type" class="form-control"><option value="Mikrobiologiczne">Mikrobiologiczne</option><option value="Fizykochemiczne">Fizykochemiczne</option><option value="Wody">Badanie wody</option><option value="Powierzchni">Czystość powierzchni</option></select>
+            </div>
+            <div class="form-group"><label>Materiał *</label><input type="text" id="test-material" class="form-control" placeholder="np. Produkt gotowy" required></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Częstotliwość</label>
+                <select id="test-frequency" class="form-control"><option>Codziennie</option><option>Tygodniowo</option><option>Miesięcznie</option><option>Kwartalnie</option><option>Rocznie</option></select>
+            </div>
+            <div class="form-group"><label>Laboratorium</label><input type="text" id="test-lab" class="form-control" placeholder="Nazwa laboratorium"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Ostatnie badanie</label><input type="date" id="test-last" class="form-control"></div>
+            <div class="form-group"><label>Następne badanie</label><input type="date" id="test-next" class="form-control"></div>
+        </div>
+        <div class="form-group"><label>Status</label>
+            <select id="test-status" class="form-control"><option value="Aktualne">Aktualne</option><option value="Do wykonania">Do wykonania</option><option value="Przeterminowane">Przeterminowane</option></select>
+        </div>
+    `;
+    openModal('Nowe badanie', bodyContent, `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveTest()"><i class="fas fa-save"></i> Zapisz</button>
+    `);
+}
+
+async function saveTest(editIndex = null) {
+    const type = document.getElementById('test-type').value;
+    const material = document.getElementById('test-material').value;
+    if (!type || !material) { showNotification('Wypełnij wymagane pola', 'warning'); return; }
+
+    const test = {
+        type, material, frequency: document.getElementById('test-frequency').value,
+        lab: document.getElementById('test-lab').value || '-',
+        lastTest: document.getElementById('test-last').value || '-',
+        nextTest: document.getElementById('test-next').value || '-',
+        status: document.getElementById('test-status').value, timestamp: new Date().toISOString()
+    };
+
+    const tests = await storage.load('tests') || [];
+    if (editIndex !== null) { tests[editIndex] = { ...tests[editIndex], ...test }; showNotification('Zaktualizowano', 'success'); }
+    else { tests.push(test); showNotification('Dodano', 'success'); }
+
+    await storage.save('tests', tests);
+    closeModal();
+    if (currentPage === 'badania') loadContentPage('badania');
+}
+
+// ==================== FLOW CHART EDITOR ====================
+
+let flowChartSteps = ['PRZYJĘCIE SUROWCA', 'PRZECHOWYWANIE', 'PRZYGOTOWANIE', 'OBRÓBKA TERMICZNA (CCP)', 'CHŁODZENIE', 'PAKOWANIE', 'WYDANIE PRODUKTU'];
+
+async function loadFlowChartData() {
+    const saved = await storage.load('flowChart');
+    if (saved && saved.length > 0) flowChartSteps = saved;
+}
+
+async function editFlowChart() {
+    await loadFlowChartData();
+    const stepsHtml = flowChartSteps.map((step, i) => `
+        <div class="form-group" style="display:flex;gap:10px;align-items:center;">
+            <span style="min-width:30px;font-weight:bold;">${i + 1}.</span>
+            <input type="text" class="form-control flow-step" value="${step}" data-index="${i}">
+            <button class="btn btn-small btn-danger" onclick="removeFlowStep(${i})" title="Usuń"><i class="fas fa-times"></i></button>
+        </div>
+    `).join('');
+
+    const bodyContent = `
+        <p style="margin-bottom:15px;color:#666;">Edytuj etapy. Dodaj "(CCP)" do nazw krytycznych punktów kontroli.</p>
+        <div id="flow-steps-container">${stepsHtml}</div>
+        <button class="btn btn-small" onclick="addFlowStep()" style="margin-top:10px;"><i class="fas fa-plus"></i> Dodaj etap</button>
+    `;
+    openModal('Edytor schematu', bodyContent, `
+        <button class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+        <button class="btn btn-success" onclick="saveFlowChart()"><i class="fas fa-save"></i> Zapisz</button>
+    `);
+}
+
+function addFlowStep() {
+    const container = document.getElementById('flow-steps-container');
+    const idx = container.children.length;
+    container.insertAdjacentHTML('beforeend', `
+        <div class="form-group" style="display:flex;gap:10px;align-items:center;">
+            <span style="min-width:30px;font-weight:bold;">${idx + 1}.</span>
+            <input type="text" class="form-control flow-step" value="" data-index="${idx}" placeholder="Nazwa etapu">
+            <button class="btn btn-small btn-danger" onclick="removeFlowStep(${idx})" title="Usuń"><i class="fas fa-times"></i></button>
+        </div>
+    `);
+}
+
+function removeFlowStep(index) {
+    const container = document.getElementById('flow-steps-container');
+    const steps = container.querySelectorAll('.form-group');
+    if (steps.length <= 1) { showNotification('Min. 1 etap', 'warning'); return; }
+    steps[index].remove();
+    container.querySelectorAll('.form-group').forEach((s, i) => {
+        s.querySelector('span').textContent = (i + 1) + '.';
+        s.querySelector('input').dataset.index = i;
+    });
+}
+
+async function saveFlowChart() {
+    const inputs = document.querySelectorAll('.flow-step');
+    const steps = [];
+    inputs.forEach(input => { const v = input.value.trim(); if (v) steps.push(v); });
+    if (steps.length === 0) { showNotification('Dodaj min. 1 etap', 'warning'); return; }
+    flowChartSteps = steps;
+    await storage.save('flowChart', flowChartSteps);
+    closeModal();
+    showNotification('Schemat zapisany', 'success');
+    if (currentPage === 'schemat') loadContentPage('schemat');
 }
 
 // Notification system
