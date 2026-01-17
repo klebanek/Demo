@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="System zarządzania dokumentacją HACCP - bezpieczeństwo żywności w zasięgu ręki">
+    <meta name="theme-color" content="#004F5D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="INOVIT HACCP">
+
+    <title>INOVIT e-Segregator HACCP</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon-72x72.svg">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <!-- Install PWA Banner -->
+    <div id="install-banner" class="install-banner" style="display: none;">
+        <div class="install-banner-content">
+            <i class="fas fa-download"></i>
+            <span>Zainstaluj aplikację na swoim urządzeniu</span>
+            <button id="install-button" class="btn-install">Instaluj</button>
+            <button id="dismiss-install" class="btn-dismiss">×</button>
+        </div>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" class="offline-indicator" style="display: none;">
+        <i class="fas fa-wifi-slash"></i>
+        <span>Tryb offline - dane zapisywane lokalnie</span>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-folder-open"></i>
+                    <div class="logo-text">
+                        <h1>INOVIT</h1>
+                        <p>Precyzyjna dokumentacja | Nowoczesne rozwiązania</p>
+                    </div>
+                </div>
+                <div class="header-nav">
+                    <button class="nav-btn" onclick="showPage('welcome')">
+                        <i class="fas fa-home"></i> Strona główna
+                    </button>
+                    <button class="nav-btn" onclick="exportData()">
+                        <i class="fas fa-download"></i> Eksport
+                    </button>
+                    <button class="nav-btn" onclick="importData()">
+                        <i class="fas fa-upload"></i> Import
+                    </button>
+                    <button class="nav-btn" onclick="showStats()">
+                        <i class="fas fa-chart-bar"></i> Statystyki
+                    </button>
+                    <button class="nav-btn" onclick="showHelp()">
+                        <i class="fas fa-question-circle"></i> Pomoc
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-content">
+
+            <!-- Welcome Page -->
+            <div id="welcome" class="welcome-page fade-in-up">
+                <div class="welcome-hero">
+                    <h2>Witamy w e-Segregatorze INOVIT</h2>
+                    <p>To nie jest kolejny segregator – to cyfrowa precyzja, której potrzebuje Twój Zakład.<br>
+                    <strong>Wersja PWA z pełnym zapisem lokalnym</strong></p>
+                    <button class="start-btn" onclick="showPage('dashboard')">
+                        <i class="fas fa-rocket"></i> ROZPOCZNIJ PRACĘ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboard" class="page-hidden">
+                <div class="content-page fade-in-up">
+                    <div class="page-header">
+                        <h2 class="page-title">Centrum Dokumentacji HACCP</h2>
+                        <button class="back-btn" onclick="showPage('welcome')">
+                            <i class="fas fa-arrow-left"></i> Strona główna
+                        </button>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="module-card" onclick="showPage('wprowadzenie')">
+                            <div class="module-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3>Wprowadzenie do dokumentacji</h3>
+                            <p>Podstawowe informacje o systemie HACCP i wymaganiach prawnych</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('opis-zakladu')">
+                            <div class="module-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <h3>Opis zakładu</h3>
+                            <p>Charakterystyka zakładu, lokalizacja, infrastruktura</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('ghp-gmp')">
+                            <div class="module-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3>Program GHP/GMP</h3>
+                            <p>Dobre Praktyki Higieniczne i Produkcyjne</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('schemat')">
+                            <div class="module-icon">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <h3>Schemat technologiczny</h3>
+                            <p>Proces produkcyjny i przepływ materiałów</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('analiza')">
+                            <div class="module-icon">
+                                <i class="fas fa-search-plus"></i>
+                            </div>
+                            <h3>Analiza zagrożeń HACCP</h3>
+                            <p>Identyfikacja i ocena zagrożeń w procesie</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('rejestry')">
+                            <div class="module-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h3>Rejestry i zapisy</h3>
+                            <p>Dokumentacja operacyjna i monitorowanie</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('korekty')">
+                            <div class="module-icon">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h3>Działania korygujące</h3>
+                            <p>Procedury naprawcze i zapobiegawcze</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('szkolenia')">
+                            <div class="module-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3>Szkolenia pracowników</h3>
+                            <p>Program edukacyjny i certyfikacja</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('audyty')">
+                            <div class="module-icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <h3>Audyty i weryfikacja</h3>
+                            <p>Kontrola wewnętrzna i przeglądy systemu</p>
+                        </div>
+
+                        <div class="module-card" onclick="showPage('badania')">
+                            <div class="module-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <h3>Plan i rejestr badań</h3>
+                            <p>Badania laboratoryjne i kontrola jakości</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content pages will be loaded here dynamically -->
+            <div id="content-container"></div>
+
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Ładowanie...</p>
+    </div>
+
+    <!-- Import File Input (hidden) -->
+    <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="handleImportFile(event)">
+
+    <!-- Scripts -->
+    <script src="/js/storage.js"></script>
+    <script src="/js/app.js"></script>
+
+    <!-- PWA Installation Script -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const installButton = document.getElementById('install-button');
+        const dismissButton = document.getElementById('dismiss-install');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBanner.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('Install prompt outcome:', outcome);
+                deferredPrompt = null;
+                installBanner.style.display = 'none';
+            }
+        });
+
+        dismissButton.addEventListener('click', () => {
+            installBanner.style.display = 'none';
+        });
+
+        // Offline/Online Detection
+        const offlineIndicator = document.getElementById('offline-indicator');
+
+        window.addEventListener('online', () => {
+            offlineIndicator.style.display = 'none';
+            showNotification('Połączono z internetem', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            offlineIndicator.style.display = 'block';
+            showNotification('Tryb offline - dane zapisywane lokalnie', 'warning');
+        });
+
+        // Check initial online status
+        if (!navigator.onLine) {
+            offlineIndicator.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
