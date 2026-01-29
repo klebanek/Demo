@@ -2,6 +2,7 @@
   "name": "INOVIT e-Segregator HACCP",
   "short_name": "INOVIT HACCP",
   "description": "System zarządzania dokumentacją HACCP - bezpieczeństwo żywności w zasięgu ręki",
+  "version": "2.0.0",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#004F5D",
@@ -45,7 +46,7 @@
       "src": "./icons/icon-192x192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
       "src": "./icons/icon-384x384.svg",
@@ -57,7 +58,7 @@
       "src": "./icons/icon-512x512.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["business", "productivity", "food"],
@@ -66,16 +67,28 @@
       "name": "Centrum Dokumentacji",
       "short_name": "Centrum",
       "description": "Przejdź do centrum dokumentacji",
-      "url": "/#dashboard",
+      "url": "./#dashboard",
       "icons": [{ "src": "./icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
     },
     {
-      "name": "Rejestry",
+      "name": "Rejestry i zapisy",
       "short_name": "Rejestry",
       "description": "Szybki dostęp do rejestrów",
-      "url": "/#rejestry",
+      "url": "./#rejestry",
+      "icons": [{ "src": "./icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Działania korygujące",
+      "short_name": "Korekty",
+      "description": "Zgłoś problem lub działanie korygujące",
+      "url": "./#korekty",
       "icons": [{ "src": "./icons/icon-96x96.svg", "sizes": "96x96", "type": "image/svg+xml" }]
     }
   ],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  }
 }
