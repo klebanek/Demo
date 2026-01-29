@@ -9,6 +9,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="INOVIT HACCP">
 
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self';">
+
     <title>INOVIT e-Segregator HACCP</title>
 
     <!-- PWA Manifest -->
@@ -18,63 +21,83 @@
     <link rel="icon" type="image/svg+xml" href="./icons/icon-72x72.svg">
     <link rel="apple-touch-icon" href="./icons/icon-192x192.svg">
 
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Font Awesome with SRI -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <!-- Styles -->
     <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
+    <!-- Skip Link for Accessibility -->
+    <!-- Dynamically added by JS -->
+
     <!-- Install PWA Banner -->
-    <div id="install-banner" class="install-banner" style="display: none;">
+    <div id="install-banner" class="install-banner" style="display: none;" role="alert">
         <div class="install-banner-content">
-            <i class="fas fa-download"></i>
+            <i class="fas fa-download" aria-hidden="true"></i>
             <span>Zainstaluj aplikację na swoim urządzeniu</span>
-            <button id="install-button" class="btn-install">Instaluj</button>
-            <button id="dismiss-install" class="btn-dismiss">×</button>
+            <button id="install-button" class="btn-install" aria-label="Zainstaluj aplikację">Instaluj</button>
+            <button id="dismiss-install" class="btn-dismiss" aria-label="Zamknij baner instalacji">&times;</button>
+        </div>
+    </div>
+
+    <!-- Update Available Banner -->
+    <div id="update-banner" class="update-banner" style="display: none;" role="alert">
+        <div class="update-banner-content">
+            <i class="fas fa-sync-alt" aria-hidden="true"></i>
+            <span>Dostępna jest nowa wersja aplikacji</span>
+            <button id="update-button" class="btn-install">Aktualizuj</button>
+            <button id="dismiss-update" class="btn-dismiss" aria-label="Zamknij">&times;</button>
         </div>
     </div>
 
     <!-- Offline Indicator -->
-    <div id="offline-indicator" class="offline-indicator" style="display: none;">
-        <i class="fas fa-wifi-slash"></i>
+    <div id="offline-indicator" class="offline-indicator" style="display: none;" role="status" aria-live="polite">
+        <i class="fas fa-wifi-slash" aria-hidden="true"></i>
         <span>Tryb offline - dane zapisywane lokalnie</span>
     </div>
 
     <!-- Header -->
-    <div class="header">
+    <header class="header" role="banner">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-folder-open"></i>
+                    <i class="fas fa-folder-open" aria-hidden="true"></i>
                     <div class="logo-text">
                         <h1>INOVIT</h1>
                         <p>Precyzyjna dokumentacja | Nowoczesne rozwiązania</p>
                     </div>
                 </div>
-                <div class="header-nav">
-                    <button class="nav-btn" onclick="showPage('welcome')">
-                        <i class="fas fa-home"></i> Strona główna
+                <nav class="header-nav" role="navigation" aria-label="Nawigacja główna">
+                    <button class="nav-btn" onclick="showPage('welcome')" aria-label="Strona główna">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span class="nav-btn-text">Strona główna</span>
                     </button>
-                    <button class="nav-btn" onclick="exportData()">
-                        <i class="fas fa-download"></i> Eksport
+                    <button class="nav-btn" onclick="exportData()" aria-label="Eksportuj dane">
+                        <i class="fas fa-download" aria-hidden="true"></i>
+                        <span class="nav-btn-text">Eksport</span>
                     </button>
-                    <button class="nav-btn" onclick="importData()">
-                        <i class="fas fa-upload"></i> Import
+                    <button class="nav-btn" onclick="importData()" aria-label="Importuj dane">
+                        <i class="fas fa-upload" aria-hidden="true"></i>
+                        <span class="nav-btn-text">Import</span>
                     </button>
-                    <button class="nav-btn" onclick="showStats()">
-                        <i class="fas fa-chart-bar"></i> Statystyki
+                    <button class="nav-btn" onclick="showStats()" aria-label="Pokaż statystyki">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span class="nav-btn-text">Statystyki</span>
                     </button>
-                    <button class="nav-btn" onclick="showHelp()">
-                        <i class="fas fa-question-circle"></i> Pomoc
+                    <button class="nav-btn" onclick="showHelp()" aria-label="Pomoc">
+                        <i class="fas fa-question-circle" aria-hidden="true"></i>
+                        <span class="nav-btn-text">Pomoc</span>
                     </button>
-                </div>
+                </nav>
             </div>
         </div>
-    </div>
+    </header>
 
     <div class="container">
-        <div class="main-content">
+        <main class="main-content" id="main-content" role="main" aria-label="Główna treść">
 
             <!-- Welcome Page -->
             <div id="welcome" class="welcome-page fade-in-up">
@@ -82,8 +105,8 @@
                     <h2>Witamy w e-Segregatorze INOVIT</h2>
                     <p>To nie jest kolejny segregator – to cyfrowa precyzja, której potrzebuje Twój Zakład.<br>
                     <strong>Wersja PWA z pełnym zapisem lokalnym</strong></p>
-                    <button class="start-btn" onclick="showPage('dashboard')">
-                        <i class="fas fa-rocket"></i> ROZPOCZNIJ PRACĘ
+                    <button class="start-btn" onclick="showPage('dashboard')" aria-label="Rozpocznij pracę z aplikacją">
+                        <i class="fas fa-rocket" aria-hidden="true"></i> ROZPOCZNIJ PRACĘ
                     </button>
                 </div>
             </div>
@@ -93,116 +116,127 @@
                 <div class="content-page fade-in-up">
                     <div class="page-header">
                         <h2 class="page-title">Centrum Dokumentacji HACCP</h2>
-                        <button class="back-btn" onclick="showPage('welcome')">
-                            <i class="fas fa-arrow-left"></i> Strona główna
+                        <button class="back-btn" onclick="showPage('welcome')" aria-label="Powrót do strony głównej">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i> Strona główna
                         </button>
                     </div>
 
-                    <div class="dashboard-grid">
-                        <div class="module-card" onclick="showPage('wprowadzenie')">
-                            <div class="module-icon">
+                    <div class="dashboard-grid" role="list">
+                        <article class="module-card" onclick="showPage('wprowadzenie')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('wprowadzenie')" aria-label="Wprowadzenie do dokumentacji">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-book-open"></i>
                             </div>
                             <h3>Wprowadzenie do dokumentacji</h3>
                             <p>Podstawowe informacje o systemie HACCP i wymaganiach prawnych</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('opis-zakladu')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('opis-zakladu')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('opis-zakladu')" aria-label="Opis zakładu">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-building"></i>
                             </div>
                             <h3>Opis zakładu</h3>
                             <p>Charakterystyka zakładu, lokalizacja, infrastruktura</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('ghp-gmp')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('ghp-gmp')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('ghp-gmp')" aria-label="Program GHP/GMP">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-shield-alt"></i>
                             </div>
                             <h3>Program GHP/GMP</h3>
                             <p>Dobre Praktyki Higieniczne i Produkcyjne</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('schemat')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('schemat')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('schemat')" aria-label="Schemat technologiczny">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-project-diagram"></i>
                             </div>
                             <h3>Schemat technologiczny</h3>
                             <p>Proces produkcyjny i przepływ materiałów</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('analiza')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('analiza')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('analiza')" aria-label="Analiza zagrożeń HACCP">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-search-plus"></i>
                             </div>
                             <h3>Analiza zagrożeń HACCP</h3>
                             <p>Identyfikacja i ocena zagrożeń w procesie</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('rejestry')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('rejestry')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('rejestry')" aria-label="Rejestry i zapisy">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-clipboard-list"></i>
                             </div>
                             <h3>Rejestry i zapisy</h3>
                             <p>Dokumentacja operacyjna i monitorowanie</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('korekty')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('korekty')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('korekty')" aria-label="Działania korygujące">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-tools"></i>
                             </div>
                             <h3>Działania korygujące</h3>
                             <p>Procedury naprawcze i zapobiegawcze</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('szkolenia')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('szkolenia')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('szkolenia')" aria-label="Szkolenia pracowników">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-graduation-cap"></i>
                             </div>
                             <h3>Szkolenia pracowników</h3>
                             <p>Program edukacyjny i certyfikacja</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('audyty')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('audyty')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('audyty')" aria-label="Audyty i weryfikacja">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-clipboard-check"></i>
                             </div>
                             <h3>Audyty i weryfikacja</h3>
                             <p>Kontrola wewnętrzna i przeglądy systemu</p>
-                        </div>
+                        </article>
 
-                        <div class="module-card" onclick="showPage('badania')">
-                            <div class="module-icon">
+                        <article class="module-card" onclick="showPage('badania')" role="listitem" tabindex="0"
+                            onkeypress="if(event.key==='Enter')showPage('badania')" aria-label="Plan i rejestr badań">
+                            <div class="module-icon" aria-hidden="true">
                                 <i class="fas fa-flask"></i>
                             </div>
                             <h3>Plan i rejestr badań</h3>
                             <p>Badania laboratoryjne i kontrola jakości</p>
-                        </div>
+                        </article>
                     </div>
                 </div>
             </div>
 
             <!-- Content pages will be loaded here dynamically -->
-            <div id="content-container"></div>
+            <div id="content-container" aria-live="polite"></div>
 
-        </div>
+        </main>
     </div>
 
     <!-- Loading Indicator -->
-    <div id="loading-indicator" class="loading-indicator" style="display: none;">
-        <div class="spinner"></div>
+    <div id="loading-indicator" class="loading-indicator" style="display: none;" role="status" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
         <p>Ładowanie...</p>
     </div>
 
     <!-- Import File Input (hidden) -->
-    <input type="file" id="import-file-input" accept=".json" style="display: none;" onchange="handleImportFile(event)">
+    <input type="file" id="import-file-input" accept=".json" style="display: none;"
+        onchange="handleImportFile(event)" aria-label="Wybierz plik do importu">
 
     <!-- Modal Container -->
-    <div id="modal-overlay" class="modal-overlay" onclick="closeModalOnOverlay(event)">
-        <div class="modal" onclick="event.stopPropagation()">
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModalOnOverlay(event)" role="presentation">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h3 id="modal-title">Tytuł</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <button class="modal-close" onclick="closeModal()" aria-label="Zamknij okno">&times;</button>
             </div>
             <div class="modal-body" id="modal-body">
                 <!-- Dynamic content -->
@@ -213,22 +247,56 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts - load in correct order -->
+    <script src="./js/config.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/validators.js"></script>
     <script src="./js/storage.js"></script>
+    <script src="./js/notifications.js"></script>
+    <script src="./js/modal.js"></script>
+    <script src="./js/navigation.js"></script>
+    <script src="./js/templates.js"></script>
+    <script src="./js/crud.js"></script>
     <script src="./js/app.js"></script>
 
     <!-- PWA Installation Script -->
     <script>
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered:', registration);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    console.log('[PWA] Service Worker registered:', registration.scope);
+
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Show update banner
+                                const updateBanner = document.getElementById('update-banner');
+                                if (updateBanner) {
+                                    updateBanner.style.display = 'block';
+                                    document.getElementById('update-button').onclick = () => {
+                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        window.location.reload();
+                                    };
+                                    document.getElementById('dismiss-update').onclick = () => {
+                                        updateBanner.style.display = 'none';
+                                    };
+                                }
+                            }
+                        });
                     });
+
+                    // Handle controller change
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        window.location.reload();
+                    });
+
+                } catch (error) {
+                    console.error('[PWA] Service Worker registration failed:', error);
+                }
             });
         }
 
@@ -241,40 +309,41 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBanner.style.display = 'block';
-        });
-
-        installButton.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log('Install prompt outcome:', outcome);
-                deferredPrompt = null;
-                installBanner.style.display = 'none';
+            if (installBanner) {
+                installBanner.style.display = 'block';
             }
         });
 
-        dismissButton.addEventListener('click', () => {
-            installBanner.style.display = 'none';
-        });
-
-        // Offline/Online Detection
-        const offlineIndicator = document.getElementById('offline-indicator');
-
-        window.addEventListener('online', () => {
-            offlineIndicator.style.display = 'none';
-            showNotification('Połączono z internetem', 'success');
-        });
-
-        window.addEventListener('offline', () => {
-            offlineIndicator.style.display = 'block';
-            showNotification('Tryb offline - dane zapisywane lokalnie', 'warning');
-        });
-
-        // Check initial online status
-        if (!navigator.onLine) {
-            offlineIndicator.style.display = 'block';
+        if (installButton) {
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log('[PWA] Install prompt outcome:', outcome);
+                    deferredPrompt = null;
+                    if (installBanner) {
+                        installBanner.style.display = 'none';
+                    }
+                }
+            });
         }
+
+        if (dismissButton) {
+            dismissButton.addEventListener('click', () => {
+                if (installBanner) {
+                    installBanner.style.display = 'none';
+                }
+            });
+        }
+
+        // Track PWA installation
+        window.addEventListener('appinstalled', () => {
+            console.log('[PWA] App installed successfully');
+            if (installBanner) {
+                installBanner.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
