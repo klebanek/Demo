@@ -36,6 +36,9 @@ const App = {
             // Register page load callbacks
             this.registerPageCallbacks();
 
+            // Initialize reminders system
+            this.initReminders();
+
             // Check for service worker updates
             this.checkForUpdates();
 
@@ -520,6 +523,40 @@ const App = {
         } catch (error) {
             console.warn('[App] Update check failed:', error);
         }
+    },
+
+    /**
+     * Initialize reminders system
+     */
+    initReminders() {
+        if (typeof Reminders !== 'undefined') {
+            Reminders.init();
+            console.log('[App] Reminders system initialized');
+        }
+    },
+
+    /**
+     * Show PDF export dialog
+     */
+    showPdfExportDialog() {
+        if (typeof PdfExport !== 'undefined') {
+            PdfExport.showExportDialog();
+        } else {
+            Notifications.error('Moduł eksportu PDF nie jest dostępny');
+        }
+    },
+
+    /**
+     * Toggle reminders panel
+     */
+    toggleRemindersPanel() {
+        const panel = document.getElementById('reminders-panel');
+        if (panel) {
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open') && typeof Reminders !== 'undefined') {
+                Reminders.display();
+            }
+        }
     }
 };
 
@@ -627,6 +664,14 @@ function viewTest(index) {
 
 function editFlowChart() {
     CrudManager.flowChart.edit();
+}
+
+function showPdfExportDialog() {
+    App.showPdfExportDialog();
+}
+
+function toggleRemindersPanel() {
+    App.toggleRemindersPanel();
 }
 
 // Initialize application

@@ -3,7 +3,7 @@
  * @description PWA service worker with cache-first strategy and update notifications
  */
 
-const CACHE_NAME = 'inovit-haccp-v2.0.0';
+const CACHE_NAME = 'inovit-haccp-v2.1.0';
 const OFFLINE_PAGE = './offline.html';
 
 const urlsToCache = [
@@ -20,6 +20,8 @@ const urlsToCache = [
     './js/navigation.js',
     './js/templates.js',
     './js/crud.js',
+    './js/pdf-export.js',
+    './js/reminders.js',
     './js/app.js',
     './manifest.json',
     './icons/icon-72x72.svg',
@@ -36,12 +38,13 @@ const urlsToCache = [
 const externalResources = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/webfonts/fa-solid-900.woff2',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/webfonts/fa-regular-400.woff2'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/webfonts/fa-regular-400.woff2',
+    'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
 ];
 
 // Install Service Worker
 self.addEventListener('install', event => {
-    console.log('[Service Worker] Installing v2.0...');
+    console.log('[Service Worker] Installing v2.1...');
 
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -73,7 +76,7 @@ self.addEventListener('install', event => {
 
 // Activate Service Worker
 self.addEventListener('activate', event => {
-    console.log('[Service Worker] Activating v2.0...');
+    console.log('[Service Worker] Activating v2.1...');
 
     event.waitUntil(
         caches.keys()

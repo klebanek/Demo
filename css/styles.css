@@ -1351,6 +1351,340 @@ kbd {
     100% { transform: rotate(360deg); }
 }
 
+/* ==================== PDF Export Dialog ==================== */
+.pdf-export-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.pdf-export-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.pdf-export-section h4 i {
+    color: var(--secondary-color);
+}
+
+.pdf-export-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.pdf-export-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--light-bg);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.pdf-export-checkboxes label:hover {
+    background: rgba(0, 115, 128, 0.1);
+}
+
+.pdf-export-checkboxes input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--secondary-color);
+}
+
+.pdf-export-info {
+    background: rgba(0, 115, 128, 0.1);
+    border-left: 4px solid var(--secondary-color);
+    padding: var(--spacing-md);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.pdf-export-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-color);
+}
+
+.pdf-export-info i {
+    color: var(--secondary-color);
+    margin-right: var(--spacing-sm);
+}
+
+/* ==================== Reminders Panel ==================== */
+.reminders-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    max-width: 100%;
+    height: 100vh;
+    background: white;
+    box-shadow: -5px 0 30px rgba(0, 0, 0, 0.15);
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    transition: right var(--transition-normal);
+}
+
+.reminders-panel.open {
+    right: 0;
+}
+
+.reminders-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+}
+
+.reminders-panel-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.reminders-panel-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.reminders-panel-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.reminders-panel-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.reminders-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+}
+
+.reminders-empty {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: #999;
+}
+
+.reminders-empty i {
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+}
+
+.reminders-empty p {
+    margin-top: var(--spacing-sm);
+    font-size: 14px;
+}
+
+/* Reminder Item */
+.reminder-item {
+    background: var(--light-bg);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-left: 4px solid var(--secondary-color);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.reminder-item:hover {
+    transform: translateX(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.reminder-item.overdue {
+    border-left-color: var(--error-color);
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.reminder-item.snoozed {
+    border-left-color: var(--warning-color);
+    opacity: 0.7;
+}
+
+.reminder-item.completed {
+    border-left-color: var(--success-color);
+    opacity: 0.6;
+}
+
+.reminder-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+}
+
+.reminder-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.reminder-title i {
+    color: var(--secondary-color);
+}
+
+.reminder-item.overdue .reminder-title i {
+    color: var(--error-color);
+}
+
+.reminder-type-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.reminder-description {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+}
+
+.reminder-time {
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.reminder-item.overdue .reminder-time {
+    color: var(--error-color);
+    font-weight: 600;
+}
+
+.reminder-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
+}
+
+.reminder-action-btn {
+    flex: 1;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+.reminder-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.reminder-action-btn.complete {
+    color: var(--success-color);
+}
+
+.reminder-action-btn.snooze {
+    color: var(--warning-color);
+}
+
+.reminder-action-btn.delete {
+    color: var(--error-color);
+}
+
+/* Reminders Badge */
+.nav-btn-reminders {
+    position: relative;
+}
+
+.reminders-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: var(--error-color);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Reminder Form */
+.reminder-form-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.reminder-form-section label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+.reminder-repeat-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.reminder-repeat-options label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-weight: normal;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--light-bg);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.reminder-repeat-options label:hover {
+    background: rgba(0, 115, 128, 0.1);
+}
+
+.reminder-repeat-options input[type="radio"] {
+    accent-color: var(--secondary-color);
+}
+
 /* ==================== Animations ==================== */
 @keyframes fadeInUp {
     from {
@@ -1482,6 +1816,15 @@ kbd {
         right: var(--spacing-sm);
         left: var(--spacing-sm);
         max-width: none;
+    }
+
+    .reminders-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    .pdf-export-checkboxes {
+        grid-template-columns: 1fr;
     }
 }
 
