@@ -406,7 +406,7 @@ const CrudManager = {
 
             tbody.innerHTML = items.length === 0
                 ? '<tr><td colspan="8" class="empty-state">Brak dostaw do wyświetlenia</td></tr>'
-                : items.map((d, i) => `
+                : items.map(d => `
                     <tr>
                         <td>${Utils.escapeHtml(d.date || '')}</td>
                         <td>${Utils.escapeHtml(d.supplier || '')}</td>
@@ -416,7 +416,7 @@ const CrudManager = {
                         <td>${Utils.escapeHtml(d.expiryDate || '-')}</td>
                         <td><span class="status ${CrudManager.getQualityClass(d.quality)}">${Utils.escapeHtml(d.quality || 'Przyjęto')}</span></td>
                         <td>
-                            <button class="btn btn-small" onclick="CrudManager.deliveries.view(${i})">
+                            <button class="btn btn-small" onclick="CrudManager.deliveries.view(${d.id})">
                                 <i class="fas fa-eye"></i> Szczegóły
                             </button>
                         </td>
@@ -444,23 +444,28 @@ const CrudManager = {
 
             if (result) {
                 const data = await this.load();
-                data.push({ ...result, timestamp: new Date().toISOString() });
+                const newItem = {
+                    id: Date.now(),
+                    ...result,
+                    timestamp: new Date().toISOString()
+                };
+                data.push(newItem);
                 await storage.save(this.storeName, data);
                 Notifications.success('Dostawa została dodana');
                 this.display();
             }
         },
 
-        async view(index) {
+        async view(id) {
             const data = await this.load();
-            const d = data[index];
+            const d = data.find(item => item.id === id);
             if (!d) {
                 Notifications.error('Nie znaleziono dostawy');
                 return;
             }
 
             Modal.open({
-                title: `Dostawa #${index + 1}`,
+                title: `Dostawa - ${Utils.escapeHtml(d.supplier || '')}`,
                 content: `
                     <div class="detail-grid">
                         <div class="detail-item"><label>Data</label><span>${Utils.escapeHtml(d.date || '-')}</span></div>
@@ -475,33 +480,39 @@ const CrudManager = {
                     ${d.notes ? `<div class="detail-notes"><label>Uwagi</label><p>${Utils.escapeHtml(d.notes)}</p></div>` : ''}
                 `,
                 footer: `
-                    <button class="btn btn-danger" onclick="CrudManager.deliveries.delete(${index})"><i class="fas fa-trash"></i> Usuń</button>
-                    <button class="btn" onclick="CrudManager.deliveries.edit(${index})"><i class="fas fa-edit"></i> Edytuj</button>
+                    <button class="btn btn-danger" onclick="CrudManager.deliveries.delete(${d.id})"><i class="fas fa-trash"></i> Usuń</button>
+                    <button class="btn" onclick="CrudManager.deliveries.edit(${d.id})"><i class="fas fa-edit"></i> Edytuj</button>
                     <button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>
                 `
             });
         },
 
-        async edit(index) {
+        async edit(id) {
             const data = await this.load();
-            const item = data[index];
-            if (!item) return;
+            const item = data.find(d => d.id === id);
+            if (!item) {
+                Notifications.error('Nie znaleziono dostawy');
+                return;
+            }
 
             const formHtml = this.getFormHtml(item);
-            const result = await Modal.form(`Edytuj dostawę #${index + 1}`, formHtml);
+            const result = await Modal.form(`Edytuj dostawę - ${Utils.escapeHtml(item.supplier || '')}`, formHtml);
 
             if (result) {
-                data[index] = { ...data[index], ...result, lastModified: new Date().toISOString() };
-                await storage.save(this.storeName, data);
-                Notifications.success('Dostawa została zaktualizowana');
-                this.display();
+                const idx = data.findIndex(d => d.id === id);
+                if (idx !== -1) {
+                    data[idx] = { ...data[idx], ...result, lastModified: new Date().toISOString() };
+                    await storage.save(this.storeName, data);
+                    Notifications.success('Dostawa została zaktualizowana');
+                    this.display();
+                }
             }
         },
 
-        async delete(index) {
+        async delete(id) {
             if (await Modal.confirm('Czy na pewno chcesz usunąć tę dostawę?')) {
-                const data = await this.load();
-                data.splice(index, 1);
+                let data = await this.load();
+                data = data.filter(d => d.id !== id);
                 await storage.save(this.storeName, data);
                 Modal.close();
                 Notifications.success('Dostawa została usunięta');
@@ -586,7 +597,7 @@ const CrudManager = {
 
             tbody.innerHTML = items.length === 0
                 ? '<tr><td colspan="9" class="empty-state">Brak zapisów temperatury</td></tr>'
-                : items.map((r, i) => `
+                : items.map(r => `
                     <tr>
                         <td>${Utils.escapeHtml(r.date || '')}</td>
                         <td>${Utils.escapeHtml(r.time || '')}</td>
@@ -597,7 +608,7 @@ const CrudManager = {
                         <td>${Utils.escapeHtml(r.notes || '-')}</td>
                         <td>${Utils.escapeHtml(r.signature || '')}</td>
                         <td>
-                            <button class="btn btn-small btn-danger" onclick="CrudManager.temperature.delete(${i})" aria-label="Usuń pomiar">
+                            <button class="btn btn-small btn-danger" onclick="CrudManager.temperature.delete(${r.id})" aria-label="Usuń pomiar">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -667,17 +678,22 @@ const CrudManager = {
 
             if (result) {
                 const data = await this.load();
-                data.push({ ...result, timestamp: new Date().toISOString() });
+                const newItem = {
+                    id: Date.now(),
+                    ...result,
+                    timestamp: new Date().toISOString()
+                };
+                data.push(newItem);
                 await storage.save(this.storeName, data);
                 Notifications.success('Pomiar został dodany');
                 this.display();
             }
         },
 
-        async delete(index) {
+        async delete(id) {
             if (await Modal.confirm('Czy na pewno chcesz usunąć ten pomiar?')) {
-                const data = await this.load();
-                data.splice(index, 1);
+                let data = await this.load();
+                data = data.filter(r => r.id !== id);
                 await storage.save(this.storeName, data);
                 Notifications.success('Pomiar został usunięty');
                 this.display();
@@ -707,7 +723,7 @@ const CrudManager = {
 
             tbody.innerHTML = items.length === 0
                 ? '<tr><td colspan="8" class="empty-state">Brak działań korygujących</td></tr>'
-                : items.map((a, i) => `
+                : items.map(a => `
                     <tr>
                         <td>${Utils.escapeHtml(a.date)}</td>
                         <td class="truncate" title="${Utils.escapeHtml(a.problem)}">${Utils.escapeHtml(a.problem)}</td>
@@ -717,7 +733,7 @@ const CrudManager = {
                         <td><span class="status ${CrudManager.getActionStatusClass(a.status)}">${Utils.escapeHtml(a.status)}</span></td>
                         <td>${Utils.escapeHtml(a.closeDate || '-')}</td>
                         <td>
-                            <button class="btn btn-small" onclick="CrudManager.correctiveActions.view(${i})">
+                            <button class="btn btn-small" onclick="CrudManager.correctiveActions.view(${a.id})">
                                 <i class="fas fa-eye"></i> Szczegóły
                             </button>
                         </td>
@@ -743,17 +759,25 @@ const CrudManager = {
 
             if (result) {
                 const data = await this.load();
-                data.push({ ...result, timestamp: new Date().toISOString() });
+                const newItem = {
+                    id: Date.now(),
+                    ...result,
+                    timestamp: new Date().toISOString()
+                };
+                data.push(newItem);
                 await storage.save(this.storeName, data);
                 Notifications.success('Działanie korygujące zostało dodane');
                 this.display();
             }
         },
 
-        async view(index) {
+        async view(id) {
             const data = await this.load();
-            const a = data[index];
-            if (!a) return;
+            const a = data.find(item => item.id === id);
+            if (!a) {
+                Notifications.error('Nie znaleziono działania');
+                return;
+            }
 
             Modal.open({
                 title: 'Działanie korygujące',
@@ -835,7 +859,7 @@ const CrudManager = {
 
             tbody.innerHTML = items.length === 0
                 ? '<tr><td colspan="6" class="empty-state">Brak szkoleń</td></tr>'
-                : items.map((t, i) => `
+                : items.map(t => `
                     <tr>
                         <td>${Utils.escapeHtml(t.topic)}</td>
                         <td>${Utils.escapeHtml(t.date)}</td>
@@ -843,7 +867,7 @@ const CrudManager = {
                         <td>${Utils.escapeHtml(t.participants || '0')}</td>
                         <td><span class="status ${CrudManager.getTrainingStatusClass(t.status)}">${Utils.escapeHtml(t.status)}</span></td>
                         <td>
-                            <button class="btn btn-small" onclick="CrudManager.trainings.view(${i})">
+                            <button class="btn btn-small" onclick="CrudManager.trainings.view(${t.id})">
                                 <i class="fas fa-eye"></i> Szczegóły
                             </button>
                         </td>
@@ -869,17 +893,25 @@ const CrudManager = {
 
             if (result) {
                 const data = await this.load();
-                data.push({ ...result, timestamp: new Date().toISOString() });
+                const newItem = {
+                    id: Date.now(),
+                    ...result,
+                    timestamp: new Date().toISOString()
+                };
+                data.push(newItem);
                 await storage.save(this.storeName, data);
                 Notifications.success('Szkolenie zostało dodane');
                 this.display();
             }
         },
 
-        async view(index) {
+        async view(id) {
             const data = await this.load();
-            const t = data[index];
-            if (!t) return;
+            const t = data.find(item => item.id === id);
+            if (!t) {
+                Notifications.error('Nie znaleziono szkolenia');
+                return;
+            }
 
             Modal.open({
                 title: 'Szczegóły szkolenia',
@@ -955,7 +987,7 @@ const CrudManager = {
 
             tbody.innerHTML = items.length === 0
                 ? '<tr><td colspan="7" class="empty-state">Brak audytów</td></tr>'
-                : items.map((a, i) => `
+                : items.map(a => `
                     <tr>
                         <td>${Utils.escapeHtml(a.type)}</td>
                         <td>${Utils.escapeHtml(a.date)}</td>
@@ -964,7 +996,7 @@ const CrudManager = {
                         <td><span class="status ${CrudManager.getAuditResultClass(a.result)}">${Utils.escapeHtml(a.result)}</span></td>
                         <td>${Utils.escapeHtml(a.notes || '-')}</td>
                         <td>
-                            <button class="btn btn-small" onclick="CrudManager.audits.view(${i})">
+                            <button class="btn btn-small" onclick="CrudManager.audits.view(${a.id})">
                                 <i class="fas fa-eye"></i> Szczegóły
                             </button>
                         </td>
@@ -989,17 +1021,25 @@ const CrudManager = {
 
             if (result) {
                 const data = await this.load();
-                data.push({ ...result, timestamp: new Date().toISOString() });
+                const newItem = {
+                    id: Date.now(),
+                    ...result,
+                    timestamp: new Date().toISOString()
+                };
+                data.push(newItem);
                 await storage.save(this.storeName, data);
                 Notifications.success('Audyt został dodany');
                 this.display();
             }
         },
 
-        async view(index) {
+        async view(id) {
             const data = await this.load();
-            const a = data[index];
-            if (!a) return;
+            const a = data.find(item => item.id === id);
+            if (!a) {
+                Notifications.error('Nie znaleziono audytu');
+                return;
+            }
 
             Modal.open({
                 title: 'Szczegóły audytu',
@@ -1084,7 +1124,7 @@ const CrudManager = {
 
             tbody.innerHTML = items.length === 0
                 ? '<tr><td colspan="8" class="empty-state">Brak badań</td></tr>'
-                : items.map((t, i) => `
+                : items.map(t => `
                     <tr>
                         <td>${Utils.escapeHtml(t.type)}</td>
                         <td>${Utils.escapeHtml(t.material)}</td>
@@ -1094,7 +1134,7 @@ const CrudManager = {
                         <td>${Utils.escapeHtml(t.nextTest || '-')}</td>
                         <td><span class="status ${CrudManager.getTestStatusClass(t.status)}">${Utils.escapeHtml(t.status)}</span></td>
                         <td>
-                            <button class="btn btn-small" onclick="CrudManager.tests.view(${i})">
+                            <button class="btn btn-small" onclick="CrudManager.tests.view(${t.id})">
                                 <i class="fas fa-eye"></i> Szczegóły
                             </button>
                         </td>
@@ -1119,17 +1159,25 @@ const CrudManager = {
 
             if (result) {
                 const data = await this.load();
-                data.push({ ...result, timestamp: new Date().toISOString() });
+                const newItem = {
+                    id: Date.now(),
+                    ...result,
+                    timestamp: new Date().toISOString()
+                };
+                data.push(newItem);
                 await storage.save(this.storeName, data);
                 Notifications.success('Badanie zostało dodane');
                 this.display();
             }
         },
 
-        async view(index) {
+        async view(id) {
             const data = await this.load();
-            const t = data[index];
-            if (!t) return;
+            const t = data.find(item => item.id === id);
+            if (!t) {
+                Notifications.error('Nie znaleziono badania');
+                return;
+            }
 
             Modal.open({
                 title: 'Szczegóły badania',

@@ -6,10 +6,10 @@
 class StorageManager {
     constructor() {
         this.dbName = 'inovit-haccp-db';
-        this.dbVersion = 1;
+        this.dbVersion = 2;
         this.db = null;
         this.storageKey = 'inovit-haccp-data';
-        this.init();
+        this.initPromise = this.init();
     }
 
     /**
@@ -22,6 +22,13 @@ class StorageManager {
         } catch (error) {
             console.warn('[Storage] IndexedDB not available, using localStorage only', error);
         }
+    }
+
+    /**
+     * Wait for storage to be ready
+     */
+    async ready() {
+        await this.initPromise;
     }
 
     /**
@@ -44,39 +51,31 @@ class StorageManager {
 
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
+                const stores = [
+                    'facility', 'procedures', 'hazards', 'temperatureLog',
+                    'trainings', 'audits', 'tests', 'deliveries',
+                    'correctiveActions', 'flowChart', 'reminders'
+                ];
 
-                // Create object stores
-                if (!db.objectStoreNames.contains('facility')) {
-                    db.createObjectStore('facility', { keyPath: 'id', autoIncrement: true });
-                }
-                if (!db.objectStoreNames.contains('procedures')) {
-                    db.createObjectStore('procedures', { keyPath: 'id', autoIncrement: true });
-                }
-                if (!db.objectStoreNames.contains('hazards')) {
-                    db.createObjectStore('hazards', { keyPath: 'id', autoIncrement: true });
-                }
-                if (!db.objectStoreNames.contains('temperatureLog')) {
-                    const tempStore = db.createObjectStore('temperatureLog', { keyPath: 'id', autoIncrement: true });
-                    tempStore.createIndex('date', 'date', { unique: false });
-                    tempStore.createIndex('device', 'device', { unique: false });
-                }
-                if (!db.objectStoreNames.contains('trainings')) {
-                    db.createObjectStore('trainings', { keyPath: 'id', autoIncrement: true });
-                }
-                if (!db.objectStoreNames.contains('audits')) {
-                    db.createObjectStore('audits', { keyPath: 'id', autoIncrement: true });
-                }
-                if (!db.objectStoreNames.contains('tests')) {
-                    db.createObjectStore('tests', { keyPath: 'id', autoIncrement: true });
-                }
-                if (!db.objectStoreNames.contains('deliveries')) {
-                    const deliveryStore = db.createObjectStore('deliveries', { keyPath: 'id', autoIncrement: true });
-                    deliveryStore.createIndex('date', 'date', { unique: false });
-                    deliveryStore.createIndex('supplier', 'supplier', { unique: false });
-                }
-                if (!db.objectStoreNames.contains('correctiveActions')) {
-                    db.createObjectStore('correctiveActions', { keyPath: 'id', autoIncrement: true });
-                }
+                stores.forEach(storeName => {
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        const store = db.createObjectStore(storeName, { keyPath: 'id' });
+
+                        // Add indexes for specific stores
+                        if (storeName === 'temperatureLog') {
+                            store.createIndex('date', 'date', { unique: false });
+                            store.createIndex('device', 'device', { unique: false });
+                        }
+                        if (storeName === 'deliveries') {
+                            store.createIndex('date', 'date', { unique: false });
+                            store.createIndex('supplier', 'supplier', { unique: false });
+                        }
+                        if (storeName === 'reminders') {
+                            store.createIndex('dueDate', 'dueDate', { unique: false });
+                            store.createIndex('status', 'status', { unique: false });
+                        }
+                    }
+                });
             };
         });
     }
@@ -86,7 +85,9 @@ class StorageManager {
      */
     async save(storeName, data) {
         try {
-            // Save to localStorage
+            await this.ready();
+
+            // Save to localStorage first (always works)
             this.saveToLocalStorage(storeName, data);
 
             // Save to IndexedDB if available
@@ -94,6 +95,7 @@ class StorageManager {
                 await this.saveToIndexedDB(storeName, data);
             }
 
+            console.log(`[Storage] Saved ${storeName}:`, Array.isArray(data) ? `${data.length} items` : 'object');
             return { success: true, message: 'Dane zapisane pomyślnie' };
         } catch (error) {
             console.error('[Storage] Save error:', error);
@@ -116,15 +118,31 @@ class StorageManager {
      */
     saveToIndexedDB(storeName, data) {
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readwrite');
-            const store = transaction.objectStore(storeName);
+            try {
+                const transaction = this.db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
 
-            const request = Array.isArray(data)
-                ? data.map(item => store.put({ ...item, timestamp: new Date().toISOString() }))
-                : store.put({ ...data, timestamp: new Date().toISOString() });
+                // Clear existing data first to ensure clean state
+                store.clear();
 
-            transaction.oncomplete = () => resolve();
-            transaction.onerror = () => reject(transaction.error);
+                // Ensure data is an array
+                const items = Array.isArray(data) ? data : [data];
+
+                // Add each item with proper id
+                items.forEach((item, index) => {
+                    const itemToSave = {
+                        ...item,
+                        id: item.id || index + 1,
+                        timestamp: new Date().toISOString()
+                    };
+                    store.put(itemToSave);
+                });
+
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -133,19 +151,33 @@ class StorageManager {
      */
     async load(storeName) {
         try {
-            // Try IndexedDB first
+            await this.ready();
+
+            // Try localStorage first (most reliable)
+            const localData = this.loadFromLocalStorage(storeName);
+
+            if (localData !== null && localData !== undefined) {
+                console.log(`[Storage] Loaded ${storeName} from localStorage`);
+                return localData;
+            }
+
+            // Fallback to IndexedDB
             if (this.db) {
-                const data = await this.loadFromIndexedDB(storeName);
-                if (data && data.length > 0) {
-                    return data;
+                const idbData = await this.loadFromIndexedDB(storeName);
+                if (idbData && idbData.length > 0) {
+                    console.log(`[Storage] Loaded ${storeName} from IndexedDB`);
+                    // Sync back to localStorage
+                    this.saveToLocalStorage(storeName, idbData);
+                    return idbData;
                 }
             }
 
-            // Fallback to localStorage
-            return this.loadFromLocalStorage(storeName);
+            console.log(`[Storage] No data found for ${storeName}`);
+            return null;
         } catch (error) {
             console.error('[Storage] Load error:', error);
-            return null;
+            // Try localStorage as final fallback
+            return this.loadFromLocalStorage(storeName);
         }
     }
 
@@ -154,7 +186,7 @@ class StorageManager {
      */
     loadFromLocalStorage(storeName) {
         const allData = this.getAllFromLocalStorage();
-        return allData[storeName] || null;
+        return allData[storeName] !== undefined ? allData[storeName] : null;
     }
 
     /**
@@ -162,12 +194,16 @@ class StorageManager {
      */
     loadFromIndexedDB(storeName) {
         return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([storeName], 'readonly');
-            const store = transaction.objectStore(storeName);
-            const request = store.getAll();
+            try {
+                const transaction = this.db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
 
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject(request.error);
+            } catch (error) {
+                reject(error);
+            }
         });
     }
 
@@ -175,8 +211,13 @@ class StorageManager {
      * Get all data from localStorage
      */
     getAllFromLocalStorage() {
-        const data = localStorage.getItem(this.storageKey);
-        return data ? JSON.parse(data) : {};
+        try {
+            const data = localStorage.getItem(this.storageKey);
+            return data ? JSON.parse(data) : {};
+        } catch (error) {
+            console.error('[Storage] Error parsing localStorage:', error);
+            return {};
+        }
     }
 
     /**
@@ -320,26 +361,24 @@ class StorageManager {
      */
     async addItem(storeName, item) {
         try {
-            if (this.db) {
-                const transaction = this.db.transaction([storeName], 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const request = store.add({
-                    ...item,
-                    timestamp: new Date().toISOString()
-                });
+            await this.ready();
 
-                return new Promise((resolve, reject) => {
-                    request.onsuccess = () => resolve(request.result);
-                    request.onerror = () => reject(request.error);
-                });
-            } else {
-                // Fallback to localStorage
-                const allData = this.getAllFromLocalStorage();
-                if (!allData[storeName]) allData[storeName] = [];
-                allData[storeName].push(item);
-                this.saveToLocalStorage(storeName, allData[storeName]);
-                return allData[storeName].length - 1;
+            // Ensure item has an id
+            const newItem = {
+                ...item,
+                id: item.id || Date.now(),
+                timestamp: new Date().toISOString()
+            };
+
+            // Load current data, add item, and save
+            let data = await this.load(storeName);
+            if (!Array.isArray(data)) {
+                data = [];
             }
+            data.push(newItem);
+            await this.save(storeName, data);
+
+            return newItem.id;
         } catch (error) {
             console.error('[Storage] Add item error:', error);
             throw error;
@@ -351,28 +390,26 @@ class StorageManager {
      */
     async updateItem(storeName, id, updates) {
         try {
-            if (this.db) {
-                const transaction = this.db.transaction([storeName], 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const getRequest = store.get(id);
+            await this.ready();
 
-                return new Promise((resolve, reject) => {
-                    getRequest.onsuccess = () => {
-                        const data = getRequest.result;
-                        if (data) {
-                            Object.assign(data, updates, {
-                                lastModified: new Date().toISOString()
-                            });
-                            const updateRequest = store.put(data);
-                            updateRequest.onsuccess = () => resolve(data);
-                            updateRequest.onerror = () => reject(updateRequest.error);
-                        } else {
-                            reject(new Error('Item not found'));
-                        }
-                    };
-                    getRequest.onerror = () => reject(getRequest.error);
-                });
+            let data = await this.load(storeName);
+            if (!Array.isArray(data)) {
+                throw new Error('Store does not contain an array');
             }
+
+            const index = data.findIndex(item => item.id === id);
+            if (index === -1) {
+                throw new Error('Item not found');
+            }
+
+            data[index] = {
+                ...data[index],
+                ...updates,
+                lastModified: new Date().toISOString()
+            };
+
+            await this.save(storeName, data);
+            return data[index];
         } catch (error) {
             console.error('[Storage] Update item error:', error);
             throw error;
@@ -384,19 +421,39 @@ class StorageManager {
      */
     async deleteItem(storeName, id) {
         try {
-            if (this.db) {
-                const transaction = this.db.transaction([storeName], 'readwrite');
-                const store = transaction.objectStore(storeName);
-                const request = store.delete(id);
+            await this.ready();
 
-                return new Promise((resolve, reject) => {
-                    request.onsuccess = () => resolve();
-                    request.onerror = () => reject(request.error);
-                });
+            let data = await this.load(storeName);
+            if (!Array.isArray(data)) {
+                throw new Error('Store does not contain an array');
             }
+
+            const index = data.findIndex(item => item.id === id);
+            if (index === -1) {
+                throw new Error('Item not found');
+            }
+
+            data.splice(index, 1);
+            await this.save(storeName, data);
         } catch (error) {
             console.error('[Storage] Delete item error:', error);
             throw error;
+        }
+    }
+
+    /**
+     * Get single item by id
+     */
+    async getItem(storeName, id) {
+        try {
+            const data = await this.load(storeName);
+            if (!Array.isArray(data)) {
+                return data && data.id === id ? data : null;
+            }
+            return data.find(item => item.id === id) || null;
+        } catch (error) {
+            console.error('[Storage] Get item error:', error);
+            return null;
         }
     }
 }
