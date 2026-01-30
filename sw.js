@@ -3,7 +3,7 @@
  * @description PWA service worker with cache-first strategy and update notifications
  */
 
-const CACHE_NAME = 'inovit-haccp-v2.2.0';
+const CACHE_NAME = 'inovit-haccp-v2.2.1';
 const OFFLINE_PAGE = './offline.html';
 
 const urlsToCache = [
