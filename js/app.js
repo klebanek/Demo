@@ -179,6 +179,7 @@ const App = {
      * Register page load callbacks
      */
     registerPageCallbacks() {
+        Navigation.onPageLoad('dashboard', () => this.loadDashboardKPI());
         Navigation.onPageLoad('opis-zakladu', () => this.loadFacilityData());
         Navigation.onPageLoad('ghp-gmp', () => CrudManager.procedures.display());
         Navigation.onPageLoad('schemat', () => CrudManager.flowChart.display());
@@ -191,6 +192,15 @@ const App = {
         Navigation.onPageLoad('szkolenia', () => CrudManager.trainings.display());
         Navigation.onPageLoad('audyty', () => CrudManager.audits.display());
         Navigation.onPageLoad('badania', () => CrudManager.tests.display());
+    },
+
+    /**
+     * Load KPI Dashboard
+     */
+    async loadDashboardKPI() {
+        if (typeof DashboardKPI !== 'undefined') {
+            await DashboardKPI.render();
+        }
     },
 
     /**
@@ -452,6 +462,7 @@ const App = {
                     <section class="help-section">
                         <h4><i class="fas fa-keyboard"></i> Skróty klawiaturowe</h4>
                         <ul class="shortcuts-list">
+                            <li><kbd>Ctrl</kbd> + <kbd>K</kbd> - Globalne wyszukiwanie</li>
                             <li><kbd>Alt</kbd> + <kbd>H</kbd> - Strona główna</li>
                             <li><kbd>Alt</kbd> + <kbd>D</kbd> - Dashboard</li>
                             <li><kbd>Alt</kbd> + <kbd>E</kbd> - Eksport danych</li>

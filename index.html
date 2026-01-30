@@ -75,6 +75,10 @@
                         <i class="fas fa-home" aria-hidden="true"></i>
                         <span class="nav-btn-text">Strona główna</span>
                     </button>
+                    <button class="nav-btn" onclick="GlobalSearch.open()" aria-label="Wyszukaj (Ctrl+K)">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <span class="nav-btn-text">Szukaj</span>
+                    </button>
                     <button class="nav-btn" onclick="exportData()" aria-label="Eksportuj dane">
                         <i class="fas fa-download" aria-hidden="true"></i>
                         <span class="nav-btn-text">Eksport</span>
@@ -82,6 +86,10 @@
                     <button class="nav-btn" onclick="showPdfExportDialog()" aria-label="Eksport PDF">
                         <i class="fas fa-file-pdf" aria-hidden="true"></i>
                         <span class="nav-btn-text">PDF</span>
+                    </button>
+                    <button class="nav-btn" onclick="showCsvExportDialog()" aria-label="Eksport CSV">
+                        <i class="fas fa-file-csv" aria-hidden="true"></i>
+                        <span class="nav-btn-text">CSV</span>
                     </button>
                     <button class="nav-btn" onclick="importData()" aria-label="Importuj dane">
                         <i class="fas fa-upload" aria-hidden="true"></i>
@@ -95,6 +103,10 @@
                     <button class="nav-btn" onclick="showStats()" aria-label="Pokaż statystyki">
                         <i class="fas fa-chart-bar" aria-hidden="true"></i>
                         <span class="nav-btn-text">Statystyki</span>
+                    </button>
+                    <button class="nav-btn" onclick="AuditLog.showLog()" aria-label="Historia zmian">
+                        <i class="fas fa-history" aria-hidden="true"></i>
+                        <span class="nav-btn-text">Historia</span>
                     </button>
                     <button class="nav-btn" onclick="showHelp()" aria-label="Pomoc">
                         <i class="fas fa-question-circle" aria-hidden="true"></i>
@@ -128,6 +140,11 @@
                         <button class="back-btn" onclick="showPage('welcome')" aria-label="Powrót do strony głównej">
                             <i class="fas fa-arrow-left" aria-hidden="true"></i> Strona główna
                         </button>
+                    </div>
+
+                    <!-- KPI Dashboard Section -->
+                    <div id="kpi-container" class="kpi-container" aria-label="Panel wskaźników KPI">
+                        <!-- KPI will be loaded dynamically -->
                     </div>
 
                     <div class="dashboard-grid" role="list">
@@ -292,6 +309,11 @@
     <script src="./js/crud.js"></script>
     <script src="./js/pdf-export.js"></script>
     <script src="./js/reminders.js"></script>
+    <script src="./js/dashboard-kpi.js"></script>
+    <script src="./js/global-search.js"></script>
+    <script src="./js/audit-log.js"></script>
+    <script src="./js/csv-export.js"></script>
+    <script src="./js/dark-mode.js"></script>
     <script src="./js/app.js"></script>
 
     <!-- PWA Installation Script -->
