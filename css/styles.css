@@ -1500,14 +1500,78 @@ kbd {
     font-size: 14px;
 }
 
+/* Reminders Section Title */
+.reminders-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: var(--spacing-sm) 0;
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    text-transform: uppercase;
+}
+
+.reminders-section-title.overdue {
+    color: var(--danger-color);
+}
+
+.reminders-section-title i {
+    font-size: 14px;
+}
+
 /* Reminder Item */
 .reminder-item {
     background: var(--light-bg);
     border-radius: var(--radius-md);
     padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     border-left: 4px solid var(--secondary-color);
     transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.reminder-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.reminder-icon i {
+    font-size: 14px;
+}
+
+.reminder-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.btn-icon {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-icon:hover {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger-color);
 }
 
 .reminder-item:hover {
@@ -3024,6 +3088,22 @@ kbd {
 
 .dark-mode .reminder-actions {
     border-color: #2d2d44;
+}
+
+.dark-mode .reminders-section-title {
+    color: var(--text-muted);
+}
+
+.dark-mode .reminders-empty {
+    color: var(--text-muted);
+}
+
+.dark-mode .btn-icon {
+    color: var(--text-muted);
+}
+
+.dark-mode .btn-icon:hover {
+    background: rgba(244, 67, 54, 0.2);
 }
 
 /* Dark Mode - Detail Grid */

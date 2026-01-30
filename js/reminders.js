@@ -730,6 +730,88 @@ const Reminders = {
             badge.textContent = count;
             badge.style.display = count > 0 ? 'inline-block' : 'none';
         }
+    },
+
+    /**
+     * Display reminders in side panel
+     */
+    async display() {
+        const listContainer = document.getElementById('reminders-list');
+        if (!listContainer) return;
+
+        const reminders = await this.load();
+        const upcoming = await this.getUpcoming(7);
+        const overdue = await this.getOverdue();
+
+        // Update badge
+        await this.updateBadge();
+
+        const formatDateTime = (datetime) => {
+            const d = new Date(datetime);
+            return `${Utils.formatDate(d)} ${d.toTimeString().substring(0, 5)}`;
+        };
+
+        const renderReminder = (r) => {
+            const typeInfo = this.types[r.type.toUpperCase()] || this.types.CUSTOM;
+            const isOverdue = new Date(r.datetime) < new Date();
+
+            return `
+                <div class="reminder-item ${isOverdue ? 'overdue' : ''} ${!r.enabled ? 'disabled' : ''}">
+                    <div class="reminder-icon" style="background-color: ${typeInfo.color}">
+                        <i class="fas ${typeInfo.icon}"></i>
+                    </div>
+                    <div class="reminder-content">
+                        <div class="reminder-title">${Utils.escapeHtml(r.title)}</div>
+                        <div class="reminder-time">
+                            <i class="far fa-clock"></i> ${formatDateTime(r.datetime)}
+                        </div>
+                    </div>
+                    <button class="btn btn-small btn-icon" onclick="Reminders.confirmDelete('${r.id}'); event.stopPropagation();" title="Usuń">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+        };
+
+        let html = '';
+
+        if (overdue.length > 0) {
+            html += `
+                <div class="reminders-section-title overdue">
+                    <i class="fas fa-exclamation-triangle"></i> Zaległe (${overdue.length})
+                </div>
+                ${overdue.map(renderReminder).join('')}
+            `;
+        }
+
+        if (upcoming.length > 0) {
+            html += `
+                <div class="reminders-section-title">
+                    <i class="fas fa-calendar-alt"></i> Nadchodzące (${upcoming.length})
+                </div>
+                ${upcoming.map(renderReminder).join('')}
+            `;
+        }
+
+        if (reminders.length === 0) {
+            html = `
+                <div class="reminders-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>Brak przypomnień</p>
+                    <small>Kliknij "Nowe" aby dodać</small>
+                </div>
+            `;
+        } else if (upcoming.length === 0 && overdue.length === 0) {
+            html = `
+                <div class="reminders-empty">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Wszystko zrobione!</p>
+                    <small>Brak aktywnych przypomnień</small>
+                </div>
+            `;
+        }
+
+        listContainer.innerHTML = html;
     }
 };
 

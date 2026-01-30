@@ -113,6 +113,9 @@ const Navigation = {
         if (page) {
             page.classList.remove(CONFIG.CSS.PAGE_HIDDEN);
             this.restartAnimation(page);
+
+            // Also load page data for static pages (like dashboard KPI)
+            this.loadPageData(pageId);
         }
     },
 

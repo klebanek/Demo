@@ -550,8 +550,8 @@ const App = {
      * Show PDF export dialog
      */
     showPdfExportDialog() {
-        if (typeof PdfExport !== 'undefined') {
-            PdfExport.showExportDialog();
+        if (typeof PDFExport !== 'undefined') {
+            PDFExport.showExportDialog();
         } else {
             Notifications.error('Moduł eksportu PDF nie jest dostępny');
         }
