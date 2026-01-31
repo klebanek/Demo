@@ -280,7 +280,7 @@
             <button class="reminders-panel-close" onclick="toggleRemindersPanel()" aria-label="Zamknij panel">&times;</button>
         </div>
         <div class="reminders-panel-actions">
-            <button class="btn btn-sm btn-primary" onclick="Reminders.add()">
+            <button class="btn btn-sm btn-primary" onclick="Reminders.showAddForm()">
                 <i class="fas fa-plus"></i> Nowe
             </button>
             <button class="btn btn-sm btn-secondary" onclick="Reminders.generateFromData()">
@@ -295,6 +295,10 @@
     <!-- jsPDF Library for PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
         integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- jsPDF AutoTable Plugin for PDF Tables -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"
+        integrity="sha512-1r5Jz/GQ9eFMoUxpLfhLZ0M2aQnXbKI3OBNlqDLbLfDYuHSU0kSeiFRrMSo8aNqk/pL7P3FXbT4wX7lZCibD7A=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- Scripts - load in correct order -->
