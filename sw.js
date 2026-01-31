@@ -1,9 +1,9 @@
 /**
- * INOVIT HACCP - Service Worker v2.2
+ * INOVIT HACCP - Service Worker v2.2.2
  * @description PWA service worker with cache-first strategy and update notifications
  */
 
-const CACHE_NAME = 'inovit-haccp-v2.2.1';
+const CACHE_NAME = 'inovit-haccp-v2.2.2';
 const OFFLINE_PAGE = './offline.html';
 
 const urlsToCache = [
@@ -49,7 +49,7 @@ const externalResources = [
 
 // Install Service Worker
 self.addEventListener('install', event => {
-    console.log('[Service Worker] Installing v2.2...');
+    console.log('[Service Worker] Installing v2.2.2...');
 
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -81,7 +81,7 @@ self.addEventListener('install', event => {
 
 // Activate Service Worker
 self.addEventListener('activate', event => {
-    console.log('[Service Worker] Activating v2.2...');
+    console.log('[Service Worker] Activating v2.2.2...');
 
     event.waitUntil(
         caches.keys()
