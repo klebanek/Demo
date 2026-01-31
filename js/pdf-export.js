@@ -43,6 +43,11 @@ const PDFExport = {
     },
 
     /**
+     * Font loaded flag
+     */
+    fontLoaded: false,
+
+    /**
      * Initialize jsPDF
      * @returns {Promise<void>}
      */
@@ -52,6 +57,66 @@ const PDFExport = {
             await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
             await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js');
         }
+    },
+
+    /**
+     * Load and register Roboto font for Polish character support
+     * @param {jsPDF} doc - jsPDF document instance
+     */
+    async loadPolishFont(doc) {
+        if (this.fontLoaded && this.fontData) {
+            // Font already loaded, just add it to this document
+            doc.addFileToVFS('Roboto-Regular.ttf', this.fontData);
+            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+            doc.addFileToVFS('Roboto-Bold.ttf', this.fontDataBold || this.fontData);
+            doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
+            return;
+        }
+
+        try {
+            // Load Roboto Regular font from Google Fonts
+            const fontUrl = 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf';
+            const fontBoldUrl = 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAw.ttf';
+
+            // Fetch font as ArrayBuffer
+            const [response, responseBold] = await Promise.all([
+                fetch(fontUrl),
+                fetch(fontBoldUrl)
+            ]);
+
+            const fontBuffer = await response.arrayBuffer();
+            const fontBoldBuffer = await responseBold.arrayBuffer();
+
+            // Convert to base64
+            this.fontData = this.arrayBufferToBase64(fontBuffer);
+            this.fontDataBold = this.arrayBufferToBase64(fontBoldBuffer);
+
+            // Add font to jsPDF
+            doc.addFileToVFS('Roboto-Regular.ttf', this.fontData);
+            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+            doc.addFileToVFS('Roboto-Bold.ttf', this.fontDataBold);
+            doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
+
+            this.fontLoaded = true;
+            console.log('[PDFExport] Roboto font loaded successfully');
+        } catch (error) {
+            console.warn('[PDFExport] Failed to load Roboto font, using fallback:', error);
+            // Font loading failed, will use default (with character issues)
+        }
+    },
+
+    /**
+     * Convert ArrayBuffer to base64 string
+     * @param {ArrayBuffer} buffer
+     * @returns {string}
+     */
+    arrayBufferToBase64(buffer) {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
     },
 
     /**
@@ -79,13 +144,22 @@ const PDFExport = {
      * Create new PDF document
      * @param {string} orientation - 'portrait' or 'landscape'
      */
-    createDocument(orientation = 'portrait') {
+    async createDocument(orientation = 'portrait') {
         const { jsPDF } = window.jspdf;
         this.doc = new jsPDF({
             orientation,
             unit: 'mm',
             format: 'a4'
         });
+
+        // Load Polish font
+        await this.loadPolishFont(this.doc);
+
+        // Set default font to Roboto (supports Polish characters)
+        if (this.fontLoaded) {
+            this.doc.setFont('Roboto', 'normal');
+        }
+
         this.y = this.settings.margin;
     },
 
@@ -103,21 +177,21 @@ const PDFExport = {
         // Logo text
         this.doc.setTextColor(255, 255, 255);
         this.doc.setFontSize(fontSize.title);
-        this.doc.setFont('helvetica', 'bold');
+        this.doc.setFont(this.fontLoaded ? 'Roboto' : 'helvetica', 'bold');
         this.doc.text('INOVIT', margin, 15);
 
         this.doc.setFontSize(fontSize.small);
-        this.doc.setFont('helvetica', 'normal');
+        this.doc.setFont(this.fontLoaded ? 'Roboto' : 'helvetica', 'normal');
         this.doc.text('e-Segregator HACCP', margin, 22);
 
         // Title
         this.doc.setFontSize(fontSize.subtitle);
-        this.doc.setFont('helvetica', 'bold');
+        this.doc.setFont(this.fontLoaded ? 'Roboto' : 'helvetica', 'bold');
         this.doc.text(title, margin, 30);
 
         // Date
         this.doc.setFontSize(fontSize.small);
-        this.doc.setFont('helvetica', 'normal');
+        this.doc.setFont(this.fontLoaded ? 'Roboto' : 'helvetica', 'normal');
         this.doc.text(`Wygenerowano: ${Utils.formatDateTime(new Date())}`, pageWidth - margin, 30, { align: 'right' });
 
         this.y = 45;
@@ -172,7 +246,7 @@ const PDFExport = {
 
         this.doc.setFontSize(fontSize.heading);
         this.doc.setTextColor(...colors.primary);
-        this.doc.setFont('helvetica', 'bold');
+        this.doc.setFont(this.fontLoaded ? 'Roboto' : 'helvetica', 'bold');
         this.doc.text(`${icon} ${text}`.trim(), margin + 6, this.y);
 
         this.y += 10;
@@ -188,7 +262,7 @@ const PDFExport = {
 
         this.doc.setFontSize(fontSize.normal);
         this.doc.setTextColor(...colors.text);
-        this.doc.setFont('helvetica', 'normal');
+        this.doc.setFont(this.fontLoaded ? 'Roboto' : 'helvetica', 'normal');
 
         const lines = this.doc.splitTextToSize(text, maxWidth);
         lines.forEach(line => {
@@ -206,6 +280,7 @@ const PDFExport = {
      */
     addTable(headers, data, options = {}) {
         const { margin, colors } = this.settings;
+        const fontName = this.fontLoaded ? 'Roboto' : 'helvetica';
 
         this.doc.autoTable({
             startY: this.y,
@@ -216,18 +291,21 @@ const PDFExport = {
                 fillColor: colors.primary,
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
-                fontSize: 9
+                fontSize: 9,
+                font: fontName
             },
             bodyStyles: {
                 fontSize: 8,
-                textColor: colors.text
+                textColor: colors.text,
+                font: fontName
             },
             alternateRowStyles: {
                 fillColor: [248, 250, 251]
             },
             styles: {
                 cellPadding: 3,
-                overflow: 'linebreak'
+                overflow: 'linebreak',
+                font: fontName
             },
             ...options
         });

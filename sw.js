@@ -1,9 +1,9 @@
 /**
- * INOVIT HACCP - Service Worker v2.2.2
+ * INOVIT HACCP - Service Worker v2.2.3
  * @description PWA service worker with cache-first strategy and update notifications
  */
 
-const CACHE_NAME = 'inovit-haccp-v2.2.2';
+const CACHE_NAME = 'inovit-haccp-v2.2.3';
 const OFFLINE_PAGE = './offline.html';
 
 const urlsToCache = [
