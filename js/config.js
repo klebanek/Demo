@@ -9,7 +9,7 @@ const CONFIG = {
     APP: {
         NAME: 'INOVIT e-Segregator HACCP',
         SHORT_NAME: 'INOVIT HACCP',
-        VERSION: '2.0.0',
+        VERSION: '2.1.0',
         AUTHOR: 'INOVIT',
         CONTACT: {
             PHONE: '+48 575-757-638',
