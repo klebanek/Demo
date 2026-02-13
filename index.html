@@ -293,32 +293,33 @@
     </div>
 
     <!-- jsPDF Library for PDF Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    <!-- ⚡ Bolt: Added defer for non-blocking load while maintaining execution order -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
         integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- jsPDF AutoTable Plugin for PDF Tables -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"
         integrity="sha512-1r5Jz/GQ9eFMoUxpLfhLZ0M2aQnXbKI3OBNlqDLbLfDYuHSU0kSeiFRrMSo8aNqk/pL7P3FXbT4wX7lZCibD7A=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- Scripts - load in correct order -->
-    <script src="./js/config.js"></script>
-    <script src="./js/utils.js"></script>
-    <script src="./js/validators.js"></script>
-    <script src="./js/storage.js"></script>
-    <script src="./js/notifications.js"></script>
-    <script src="./js/modal.js"></script>
-    <script src="./js/navigation.js"></script>
-    <script src="./js/templates.js"></script>
-    <script src="./js/crud.js"></script>
-    <script src="./js/pdf-export.js"></script>
-    <script src="./js/reminders.js"></script>
-    <script src="./js/dashboard-kpi.js"></script>
-    <script src="./js/global-search.js"></script>
-    <script src="./js/audit-log.js"></script>
-    <script src="./js/csv-export.js"></script>
-    <script src="./js/dark-mode.js"></script>
-    <script src="./js/app.js"></script>
+    <script defer src="./js/config.js"></script>
+    <script defer src="./js/utils.js"></script>
+    <script defer src="./js/validators.js"></script>
+    <script defer src="./js/storage.js"></script>
+    <script defer src="./js/notifications.js"></script>
+    <script defer src="./js/modal.js"></script>
+    <script defer src="./js/navigation.js"></script>
+    <script defer src="./js/templates.js"></script>
+    <script defer src="./js/crud.js"></script>
+    <script defer src="./js/pdf-export.js"></script>
+    <script defer src="./js/reminders.js"></script>
+    <script defer src="./js/dashboard-kpi.js"></script>
+    <script defer src="./js/global-search.js"></script>
+    <script defer src="./js/audit-log.js"></script>
+    <script defer src="./js/csv-export.js"></script>
+    <script defer src="./js/dark-mode.js"></script>
+    <script defer src="./js/app.js"></script>
 
     <!-- PWA Installation Script -->
     <script>
