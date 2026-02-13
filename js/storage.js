@@ -250,6 +250,46 @@ class StorageManager {
     }
 
     /**
+     * Sanitize import data to prevent XSS via ID injection
+     */
+    sanitizeImportData(data) {
+        const sanitizeItems = (items) => {
+            if (!Array.isArray(items)) return;
+            items.forEach(item => {
+                if (!item) return;
+
+                let safeId = item.id;
+
+                if (safeId !== undefined && safeId !== null) {
+                    const isNumber = typeof safeId === 'number';
+                    const isSafeString = typeof safeId === 'string' && /^[a-zA-Z0-9_-]+$/.test(safeId);
+
+                    if (!isNumber && !isSafeString) {
+                        console.warn(`[Storage] Sanitizing unsafe ID: ${safeId}`);
+                        item.id = Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+                    }
+                }
+            });
+        };
+
+        if (data.localStorage) {
+            Object.values(data.localStorage).forEach(storeData => {
+                 if (Array.isArray(storeData)) {
+                     sanitizeItems(storeData);
+                 }
+            });
+        }
+
+        if (data.indexedDB) {
+            Object.values(data.indexedDB).forEach(storeData => {
+                if (Array.isArray(storeData)) {
+                    sanitizeItems(storeData);
+                }
+            });
+        }
+    }
+
+    /**
      * Import data from JSON
      */
     async importData(jsonData) {
@@ -257,6 +297,9 @@ class StorageManager {
             if (!jsonData || typeof jsonData !== 'object') {
                 throw new Error('Invalid import data');
             }
+
+            // Sanitize data before import
+            this.sanitizeImportData(jsonData);
 
             // Import to localStorage
             if (jsonData.localStorage) {
