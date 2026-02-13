@@ -51,6 +51,7 @@ const Reminders = {
 
         // Check immediately
         await this.checkReminders();
+        await this.updateBadge();
 
         console.log('[Reminders] Initialized');
     },
@@ -112,6 +113,7 @@ const Reminders = {
      */
     async save(reminders) {
         await storage.save(this.storeName, reminders);
+        await this.updateBadge();
     },
 
     /**
@@ -729,6 +731,15 @@ const Reminders = {
         if (badge) {
             badge.textContent = count;
             badge.style.display = count > 0 ? 'inline-block' : 'none';
+
+            // Update ARIA label for accessibility
+            const btn = badge.closest('button');
+            if (btn) {
+                const label = count > 0
+                    ? `Przypomnienia, ${count} aktywnych`
+                    : 'Przypomnienia';
+                btn.setAttribute('aria-label', label);
+            }
         }
     },
 
