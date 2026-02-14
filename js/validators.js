@@ -19,7 +19,6 @@ const Validators = {
         dateRange: 'Data końcowa musi być późniejsza niż początkowa',
         number: 'Podaj prawidłową liczbę',
         temperature: 'Temperatura musi być między -50°C a 150°C',
-        positiveNumber: 'Podaj liczbę większą od zera',
         url: 'Podaj prawidłowy adres URL',
         fileSize: (max) => `Maksymalny rozmiar pliku to ${max}`,
         fileType: (types) => `Dozwolone typy plików: ${types.join(', ')}`
@@ -141,16 +140,6 @@ const Validators = {
         if (!this.number(value)) return false;
         const temp = parseFloat(value);
         return temp >= min && temp <= max;
-    },
-
-    /**
-     * Validate positive number
-     * @param {*} value - Value to check
-     * @returns {boolean} Is valid
-     */
-    positiveNumber(value) {
-        if (!this.number(value)) return false;
-        return parseFloat(value) > 0;
     },
 
     /**
