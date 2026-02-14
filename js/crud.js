@@ -1566,16 +1566,23 @@ const CrudManager = {
         // Setup sortable headers
         const table = document.querySelector(`#${tableName.replace(/([A-Z])/g, '-$1').toLowerCase()}-table, #${tableName}-table`);
         if (table) {
+            // Set cursor on sortable headers
             table.querySelectorAll('th[data-sort]').forEach(th => {
                 th.style.cursor = 'pointer';
-                th.onclick = () => {
-                    const column = th.dataset.sort;
-                    const currentSort = this.sortState[tableName];
-                    const direction = currentSort?.column === column && currentSort?.direction === 'asc' ? 'desc' : 'asc';
-                    this.sortState[tableName] = { column, direction };
-                    this.refreshTable(tableName);
-                };
             });
+
+            // Use event delegation for sorting to improve performance
+            table.onclick = (e) => {
+                const th = e.target.closest('th[data-sort]');
+                // Ensure the click is on a header of THIS table (not a nested one)
+                if (!th || th.closest('table') !== table) return;
+
+                const column = th.dataset.sort;
+                const currentSort = this.sortState[tableName];
+                const direction = currentSort?.column === column && currentSort?.direction === 'asc' ? 'desc' : 'asc';
+                this.sortState[tableName] = { column, direction };
+                this.refreshTable(tableName);
+            };
         }
 
         // Setup search inputs
