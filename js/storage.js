@@ -10,6 +10,7 @@ class StorageManager {
         this.db = null;
         this.storageKey = 'inovit-haccp-data';
         this.initPromise = this.init();
+        this.memoryCache = null;
     }
 
     /**
@@ -211,9 +212,11 @@ class StorageManager {
      * Get all data from localStorage
      */
     getAllFromLocalStorage() {
+        if (this.memoryCache) return this.memoryCache;
         try {
             const data = localStorage.getItem(this.storageKey);
-            return data ? JSON.parse(data) : {};
+            this.memoryCache = data ? JSON.parse(data) : {};
+            return this.memoryCache;
         } catch (error) {
             console.error('[Storage] Error parsing localStorage:', error);
             return {};
@@ -261,6 +264,7 @@ class StorageManager {
             // Import to localStorage
             if (jsonData.localStorage) {
                 localStorage.setItem(this.storageKey, JSON.stringify(jsonData.localStorage));
+                this.memoryCache = null;
             }
 
             // Import to IndexedDB
@@ -286,6 +290,7 @@ class StorageManager {
         try {
             // Clear localStorage
             localStorage.removeItem(this.storageKey);
+            this.memoryCache = null;
 
             // Clear IndexedDB
             if (this.db) {
