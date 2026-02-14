@@ -87,8 +87,9 @@ const AuditLog = {
                 logs.splice(this.MAX_ENTRIES);
             }
 
-            // Save directly to localStorage to avoid recursion
-            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(logs));
+            // Save using storage manager to ensure encryption
+            // The key check in wrapStorageMethods prevents recursion
+            await storage.save(this.STORAGE_KEY, logs);
 
         } catch (error) {
             console.error('[AuditLog] Error logging change:', error);
@@ -100,8 +101,8 @@ const AuditLog = {
      */
     async getLogs() {
         try {
-            const stored = localStorage.getItem(this.STORAGE_KEY);
-            return stored ? JSON.parse(stored) : [];
+            const logs = await storage.load(this.STORAGE_KEY);
+            return Array.isArray(logs) ? logs : [];
         } catch {
             return [];
         }
@@ -335,7 +336,7 @@ const AuditLog = {
      * Clear all logs
      */
     async clearLog() {
-        localStorage.removeItem(this.STORAGE_KEY);
+        await storage.save(this.STORAGE_KEY, []);
     },
 
     /**
