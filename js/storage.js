@@ -3,14 +3,159 @@
  * Supports localStorage, IndexedDB, and automatic sync
  */
 
+/**
+ * Helper for Web Crypto API encryption/decryption
+ */
+const CryptoHelper = {
+    DB_NAME: 'inovit-haccp-crypto',
+    STORE_NAME: 'keys',
+    KEY_ID: 'encryption-key',
+
+    /**
+     * Convert Uint8Array to Base64 string safely (avoiding stack overflow)
+     */
+    uint8ArrayToBase64(arr) {
+        let binary = '';
+        const len = arr.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(arr[i]);
+        }
+        return btoa(binary);
+    },
+
+    /**
+     * Convert Base64 string to Uint8Array safely
+     */
+    base64ToUint8Array(base64) {
+        const binaryString = atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes;
+    },
+
+    /**
+     * Get or generate encryption key from IndexedDB
+     */
+    async getKey() {
+        if (!window.crypto || !window.crypto.subtle) {
+            console.warn('[Crypto] Web Crypto API not available');
+            return null;
+        }
+
+        return new Promise((resolve) => {
+            const request = indexedDB.open(this.DB_NAME, 1);
+            request.onupgradeneeded = (e) => {
+                e.target.result.createObjectStore(this.STORE_NAME);
+            };
+            request.onsuccess = (e) => {
+                const db = e.target.result;
+                const transaction = db.transaction([this.STORE_NAME], 'readonly');
+                const store = transaction.objectStore(this.STORE_NAME);
+                const getRequest = store.get(this.KEY_ID);
+
+                getRequest.onsuccess = async () => {
+                    if (getRequest.result) {
+                        resolve(getRequest.result);
+                    } else {
+                        try {
+                            // Generate key
+                            const newKey = await crypto.subtle.generateKey(
+                                { name: "AES-GCM", length: 256 },
+                                true,
+                                ["encrypt", "decrypt"]
+                            );
+
+                            // Start a NEW transaction for the put because the previous one might have auto-committed
+                            // while we were awaiting generateKey
+                            const putTransaction = db.transaction([this.STORE_NAME], 'readwrite');
+                            const putStore = putTransaction.objectStore(this.STORE_NAME);
+                            const putRequest = putStore.put(newKey, this.KEY_ID);
+
+                            putRequest.onsuccess = () => resolve(newKey);
+                            putRequest.onerror = (err) => {
+                                console.error('[Crypto] Key storage failed:', err);
+                                resolve(null);
+                            };
+                        } catch (err) {
+                            console.error('[Crypto] Key generation failed:', err);
+                            resolve(null);
+                        }
+                    }
+                };
+                getRequest.onerror = () => resolve(null);
+            };
+            request.onerror = () => resolve(null);
+        });
+    },
+
+    /**
+     * Encrypt data using AES-GCM
+     */
+    async encrypt(data, key) {
+        try {
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const encoded = new TextEncoder().encode(JSON.stringify(data));
+            const ciphertext = await crypto.subtle.encrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                encoded
+            );
+
+            return {
+                ciphertext: this.uint8ArrayToBase64(new Uint8Array(ciphertext)),
+                iv: this.uint8ArrayToBase64(iv),
+                v: 1
+            };
+        } catch (err) {
+            console.error('[Crypto] Encryption failed:', err);
+            return data;
+        }
+    },
+
+    /**
+     * Decrypt data using AES-GCM
+     */
+    async decrypt(encryptedData, key) {
+        try {
+            const { ciphertext, iv } = encryptedData;
+            const ivArr = this.base64ToUint8Array(iv);
+            const ciphertextArr = this.base64ToUint8Array(ciphertext);
+
+            const decrypted = await crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: ivArr },
+                key,
+                ciphertextArr
+            );
+
+            return JSON.parse(new TextDecoder().decode(decrypted));
+        } catch (err) {
+            console.error('[Crypto] Decryption failed:', err);
+            throw err;
+        }
+    }
+};
+
 class StorageManager {
     constructor() {
-        this.dbName = 'inovit-haccp-db';
-        this.dbVersion = 2;
+        this.dbName = typeof CONFIG !== 'undefined' ? CONFIG.STORAGE.DB_NAME : 'inovit-haccp-db';
+        this.dbVersion = (typeof CONFIG !== 'undefined' ? CONFIG.STORAGE.DB_VERSION : 2) + 1; // Bump version for settings store
         this.db = null;
-        this.storageKey = 'inovit-haccp-data';
-        this.initPromise = this.init();
+        this.storageKey = typeof CONFIG !== 'undefined' ? CONFIG.STORAGE.LOCAL_STORAGE_KEY : 'inovit-haccp-data';
+
+        // Define all stores centrally
+        this.stores = [
+            'facility', 'procedures', 'hazards', 'temperatureLog',
+            'trainings', 'audits', 'tests', 'deliveries',
+            'correctiveActions', 'flowChart', 'reminders', 'auditLog'
+        ];
+
         this.memoryCache = null;
+        this.encryptionKey = null;
+        this.loadingCachePromise = null;
+        this.initPromise = this.init();
     }
 
     /**
@@ -19,9 +164,10 @@ class StorageManager {
     async init() {
         try {
             await this.initIndexedDB();
-            console.log('[Storage] IndexedDB initialized');
+            this.encryptionKey = await CryptoHelper.getKey();
+            console.log('[Storage] Storage system initialized with encryption');
         } catch (error) {
-            console.warn('[Storage] IndexedDB not available, using localStorage only', error);
+            console.warn('[Storage] Initialization warning:', error);
         }
     }
 
@@ -52,13 +198,17 @@ class StorageManager {
 
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
-                const stores = [
-                    'facility', 'procedures', 'hazards', 'temperatureLog',
-                    'trainings', 'audits', 'tests', 'deliveries',
-                    'correctiveActions', 'flowChart', 'reminders'
-                ];
 
-                stores.forEach(storeName => {
+                // Use stores from config if available, otherwise use our default list
+                let storesToCreate = this.stores;
+                if (typeof CONFIG !== 'undefined' && CONFIG.STORAGE && CONFIG.STORAGE.STORES) {
+                    storesToCreate = CONFIG.STORAGE.STORES;
+                }
+
+                // Add internal stores
+                const allStores = [...new Set([...storesToCreate, 'internal_settings'])];
+
+                allStores.forEach(storeName => {
                     if (!db.objectStoreNames.contains(storeName)) {
                         const store = db.createObjectStore(storeName, { keyPath: 'id' });
 
@@ -89,7 +239,7 @@ class StorageManager {
             await this.ready();
 
             // Save to localStorage first (always works)
-            this.saveToLocalStorage(storeName, data);
+            await this.saveToLocalStorage(storeName, data);
 
             // Save to IndexedDB if available
             if (this.db) {
@@ -105,13 +255,31 @@ class StorageManager {
     }
 
     /**
-     * Save to localStorage
+     * Save to localStorage (encrypted)
      */
-    saveToLocalStorage(storeName, data) {
-        const allData = this.getAllFromLocalStorage();
+    async saveToLocalStorage(storeName, data) {
+        const allData = await this.getAllFromLocalStorage();
         allData[storeName] = data;
         allData.lastModified = new Date().toISOString();
-        localStorage.setItem(this.storageKey, JSON.stringify(allData));
+        await this.saveAllToLocalStorage(allData);
+    }
+
+    /**
+     * Save all data to localStorage with encryption
+     */
+    async saveAllToLocalStorage(allData) {
+        this.memoryCache = allData;
+        let dataToStore = JSON.stringify(allData);
+
+        if (this.encryptionKey) {
+            const encrypted = await CryptoHelper.encrypt(allData, this.encryptionKey);
+            dataToStore = JSON.stringify(encrypted);
+        }
+
+        localStorage.setItem(this.storageKey, dataToStore);
+
+        // Cleanup old unencrypted keys if they exist
+        localStorage.removeItem('auditLog');
     }
 
     /**
@@ -120,6 +288,11 @@ class StorageManager {
     saveToIndexedDB(storeName, data) {
         return new Promise((resolve, reject) => {
             try {
+                if (!this.db.objectStoreNames.contains(storeName)) {
+                    reject(new Error(`Store ${storeName} not found`));
+                    return;
+                }
+
                 const transaction = this.db.transaction([storeName], 'readwrite');
                 const store = transaction.objectStore(storeName);
 
@@ -155,7 +328,7 @@ class StorageManager {
             await this.ready();
 
             // Try localStorage first (most reliable)
-            const localData = this.loadFromLocalStorage(storeName);
+            const localData = await this.loadFromLocalStorage(storeName);
 
             if (localData !== null && localData !== undefined) {
                 console.log(`[Storage] Loaded ${storeName} from localStorage`);
@@ -168,7 +341,7 @@ class StorageManager {
                 if (idbData && idbData.length > 0) {
                     console.log(`[Storage] Loaded ${storeName} from IndexedDB`);
                     // Sync back to localStorage
-                    this.saveToLocalStorage(storeName, idbData);
+                    await this.saveToLocalStorage(storeName, idbData);
                     return idbData;
                 }
             }
@@ -178,15 +351,15 @@ class StorageManager {
         } catch (error) {
             console.error('[Storage] Load error:', error);
             // Try localStorage as final fallback
-            return this.loadFromLocalStorage(storeName);
+            return await this.loadFromLocalStorage(storeName);
         }
     }
 
     /**
      * Load from localStorage
      */
-    loadFromLocalStorage(storeName) {
-        const allData = this.getAllFromLocalStorage();
+    async loadFromLocalStorage(storeName) {
+        const allData = await this.getAllFromLocalStorage();
         return allData[storeName] !== undefined ? allData[storeName] : null;
     }
 
@@ -196,6 +369,11 @@ class StorageManager {
     loadFromIndexedDB(storeName) {
         return new Promise((resolve, reject) => {
             try {
+                if (!this.db.objectStoreNames.contains(storeName)) {
+                    resolve([]); // Store not found, return empty array
+                    return;
+                }
+
                 const transaction = this.db.transaction([storeName], 'readonly');
                 const store = transaction.objectStore(storeName);
                 const request = store.getAll();
@@ -209,18 +387,61 @@ class StorageManager {
     }
 
     /**
-     * Get all data from localStorage
+     * Get all data from localStorage (decrypted)
      */
-    getAllFromLocalStorage() {
+    async getAllFromLocalStorage() {
         if (this.memoryCache) return this.memoryCache;
-        try {
-            const data = localStorage.getItem(this.storageKey);
-            this.memoryCache = data ? JSON.parse(data) : {};
-            return this.memoryCache;
-        } catch (error) {
-            console.error('[Storage] Error parsing localStorage:', error);
-            return {};
-        }
+        if (this.loadingCachePromise) return this.loadingCachePromise;
+
+        this.loadingCachePromise = (async () => {
+            try {
+                const rawData = localStorage.getItem(this.storageKey);
+
+                // Migration check: auditLog used to be in its own key
+                const oldAuditLog = localStorage.getItem('auditLog');
+
+                if (!rawData && !oldAuditLog) {
+                    this.memoryCache = {};
+                    return {};
+                }
+
+                let parsedData = {};
+                if (rawData) {
+                    try {
+                        const parsed = JSON.parse(rawData);
+                        // Check if it's encrypted
+                        if (parsed && parsed.ciphertext && parsed.iv) {
+                            if (this.encryptionKey) {
+                                parsedData = await CryptoHelper.decrypt(parsed, this.encryptionKey);
+                            } else {
+                                console.warn('[Storage] Data is encrypted but key is not available');
+                                return {};
+                            }
+                        } else {
+                            parsedData = parsed || {};
+                        }
+                    } catch (e) {
+                        console.error('[Storage] Error parsing/decrypting localStorage:', e);
+                    }
+                }
+
+                // Migrate auditLog if it exists separately
+                if (oldAuditLog && !parsedData.auditLog) {
+                    try {
+                        parsedData.auditLog = JSON.parse(oldAuditLog);
+                    } catch (e) {
+                        console.error('[Storage] Error parsing old auditLog:', e);
+                    }
+                }
+
+                this.memoryCache = parsedData;
+                return this.memoryCache;
+            } finally {
+                this.loadingCachePromise = null;
+            }
+        })();
+
+        return this.loadingCachePromise;
     }
 
     /**
@@ -228,20 +449,20 @@ class StorageManager {
      */
     async exportData() {
         try {
+            await this.ready();
             const data = {
-                version: '1.0.0',
+                version: '1.1.0',
                 exportDate: new Date().toISOString(),
-                localStorage: this.getAllFromLocalStorage(),
+                localStorage: await this.getAllFromLocalStorage(),
                 indexedDB: {}
             };
 
             // Export IndexedDB data if available
             if (this.db) {
-                const stores = ['facility', 'procedures', 'hazards', 'temperatureLog',
-                              'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions'];
-
-                for (const storeName of stores) {
-                    data.indexedDB[storeName] = await this.loadFromIndexedDB(storeName);
+                for (const storeName of this.stores) {
+                    if (storeName !== 'auditLog') { // Usually we don't export logs
+                        data.indexedDB[storeName] = await this.loadFromIndexedDB(storeName);
+                    }
                 }
             }
 
@@ -257,14 +478,14 @@ class StorageManager {
      */
     async importData(jsonData) {
         try {
+            await this.ready();
             if (!jsonData || typeof jsonData !== 'object') {
                 throw new Error('Invalid import data');
             }
 
             // Import to localStorage
             if (jsonData.localStorage) {
-                localStorage.setItem(this.storageKey, JSON.stringify(jsonData.localStorage));
-                this.memoryCache = null;
+                await this.saveAllToLocalStorage(jsonData.localStorage);
             }
 
             // Import to IndexedDB
@@ -288,16 +509,16 @@ class StorageManager {
      */
     async clearAll() {
         try {
+            await this.ready();
             // Clear localStorage
             localStorage.removeItem(this.storageKey);
+            localStorage.removeItem('auditLog');
             this.memoryCache = null;
 
             // Clear IndexedDB
             if (this.db) {
-                const stores = ['facility', 'procedures', 'hazards', 'temperatureLog',
-                              'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions'];
-
-                for (const storeName of stores) {
+                const storesToClear = [...this.stores, 'internal_settings'];
+                for (const storeName of storesToClear) {
                     await this.clearStore(storeName);
                 }
             }
@@ -314,6 +535,10 @@ class StorageManager {
      */
     clearStore(storeName) {
         return new Promise((resolve, reject) => {
+            if (!this.db.objectStoreNames.contains(storeName)) {
+                resolve(); // Nothing to clear
+                return;
+            }
             const transaction = this.db.transaction([storeName], 'readwrite');
             const store = transaction.objectStore(storeName);
             const request = store.clear();
@@ -327,6 +552,7 @@ class StorageManager {
      * Get storage statistics
      */
     async getStats() {
+        await this.ready();
         const stats = {
             localStorage: {
                 used: 0,
@@ -340,18 +566,16 @@ class StorageManager {
         };
 
         // localStorage stats
-        const data = localStorage.getItem(this.storageKey);
-        if (data) {
-            stats.localStorage.used = new Blob([data]).size;
-            stats.localStorage.items = Object.keys(JSON.parse(data)).length;
+        const rawData = localStorage.getItem(this.storageKey);
+        if (rawData) {
+            stats.localStorage.used = new Blob([rawData]).size;
+            const data = await this.getAllFromLocalStorage();
+            stats.localStorage.items = Object.keys(data).length;
         }
 
         // IndexedDB stats
         if (this.db) {
-            const stores = ['facility', 'procedures', 'hazards', 'temperatureLog',
-                          'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions'];
-
-            for (const storeName of stores) {
+            for (const storeName of this.stores) {
                 const data = await this.loadFromIndexedDB(storeName);
                 stats.indexedDB.stores[storeName] = Array.isArray(data) ? data.length : 0;
                 stats.indexedDB.totalRecords += stats.indexedDB.stores[storeName];
