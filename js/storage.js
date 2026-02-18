@@ -238,7 +238,7 @@ class StorageManager {
             // Export IndexedDB data if available
             if (this.db) {
                 const stores = ['facility', 'procedures', 'hazards', 'temperatureLog',
-                              'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions'];
+                              'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions', 'reminders', 'flowChart'];
 
                 for (const storeName of stores) {
                     data.indexedDB[storeName] = await this.loadFromIndexedDB(storeName);
@@ -295,7 +295,7 @@ class StorageManager {
             // Clear IndexedDB
             if (this.db) {
                 const stores = ['facility', 'procedures', 'hazards', 'temperatureLog',
-                              'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions'];
+                              'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions', 'reminders', 'flowChart'];
 
                 for (const storeName of stores) {
                     await this.clearStore(storeName);
@@ -349,7 +349,7 @@ class StorageManager {
         // IndexedDB stats
         if (this.db) {
             const stores = ['facility', 'procedures', 'hazards', 'temperatureLog',
-                          'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions'];
+                          'trainings', 'audits', 'tests', 'deliveries', 'correctiveActions', 'reminders', 'flowChart'];
 
             for (const storeName of stores) {
                 const data = await this.loadFromIndexedDB(storeName);
