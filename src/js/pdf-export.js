@@ -3,6 +3,7 @@ import { Utils } from "./utils.js";
 import { storage } from "./storage.js";
 import { Notifications } from "./notifications.js";
 import { Modal } from "./modal.js";
+import { ROBOTO_REGULAR, ROBOTO_BOLD } from "./fonts.js";
 /**
  * INOVIT HACCP - PDF Export Module
  * @module pdf-export
@@ -69,60 +70,22 @@ export const PDFExport = {
      * @param {jsPDF} doc - jsPDF document instance
      */
     async loadPolishFont(doc) {
-        if (this.fontLoaded && this.fontData) {
-            // Font already loaded, just add it to this document
-            doc.addFileToVFS('Roboto-Regular.ttf', this.fontData);
-            doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-            doc.addFileToVFS('Roboto-Bold.ttf', this.fontDataBold || this.fontData);
-            doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
-            return;
-        }
-
         try {
-            // Load Roboto Regular font from Google Fonts
-            const fontUrl = 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf';
-            const fontBoldUrl = 'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAw.ttf';
-
-            // Fetch font as ArrayBuffer
-            const [response, responseBold] = await Promise.all([
-                fetch(fontUrl),
-                fetch(fontBoldUrl)
-            ]);
-
-            const fontBuffer = await response.arrayBuffer();
-            const fontBoldBuffer = await responseBold.arrayBuffer();
-
-            // Convert to base64
-            this.fontData = this.arrayBufferToBase64(fontBuffer);
-            this.fontDataBold = this.arrayBufferToBase64(fontBoldBuffer);
-
             // Add font to jsPDF
-            doc.addFileToVFS('Roboto-Regular.ttf', this.fontData);
+            doc.addFileToVFS('Roboto-Regular.ttf', ROBOTO_REGULAR);
             doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-            doc.addFileToVFS('Roboto-Bold.ttf', this.fontDataBold);
+
+            doc.addFileToVFS('Roboto-Bold.ttf', ROBOTO_BOLD);
             doc.addFont('Roboto-Bold.ttf', 'Roboto', 'bold');
 
             this.fontLoaded = true;
             console.log('[PDFExport] Roboto font loaded successfully');
         } catch (error) {
-            console.warn('[PDFExport] Failed to load Roboto font, using fallback:', error);
-            // Font loading failed, will use default (with character issues)
+            console.error('[PDFExport] Failed to load Roboto font:', error);
         }
     },
 
-    /**
-     * Convert ArrayBuffer to base64 string
-     * @param {ArrayBuffer} buffer
-     * @returns {string}
-     */
-    arrayBufferToBase64(buffer) {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        for (let i = 0; i < bytes.byteLength; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return btoa(binary);
-    },
+
 
     /**
      * Load external script
