@@ -1,10 +1,15 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
+import { storage } from "./storage.js";
+import { Navigation } from "./navigation.js";
+import { Modal } from "./modal.js";
 /**
  * INOVIT HACCP - Global Search Module
  * @module global-search
  * @description Global search functionality with Ctrl+K shortcut
  */
 
-const GlobalSearch = {
+export const GlobalSearch = {
     isOpen: false,
     searchResults: [],
     selectedIndex: 0,
@@ -437,6 +442,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GlobalSearch;
-}

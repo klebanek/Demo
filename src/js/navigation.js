@@ -1,10 +1,16 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
+import { PageTemplates } from "./templates.js";
+import { Notifications } from "./notifications.js";
+import { Modal } from "./modal.js";
+import { CrudManager } from "./crud.js";
 /**
  * INOVIT HACCP - Navigation Module
  * @module navigation
  * @description Page navigation and routing system
  */
 
-const Navigation = {
+export const Navigation = {
     /**
      * Current page ID
      */
@@ -264,7 +270,3 @@ function showPage(pageId) {
     Navigation.showPage(pageId);
 }
 
-// Export for ES6 modules (future use)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Navigation;
-}

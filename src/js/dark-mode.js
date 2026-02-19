@@ -1,10 +1,12 @@
+import { CONFIG } from "./config.js";
+import { storage } from "./storage.js";
 /**
  * INOVIT HACCP - Dark Mode Module
  * @module dark-mode
  * @description Toggle between light and dark themes
  */
 
-const DarkMode = {
+export const DarkMode = {
     STORAGE_KEY: 'darkMode',
     isEnabled: false,
 
@@ -127,6 +129,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = DarkMode;
-}

@@ -1,10 +1,11 @@
+import { CONFIG } from "./config.js";
 /**
  * INOVIT HACCP - Page Templates Module
  * @module templates
  * @description HTML templates for dynamic pages
  */
 
-const PageTemplates = {
+export const PageTemplates = {
     /**
      * Get page content by ID
      * @param {string} pageId - Page ID
@@ -576,7 +577,3 @@ const PageTemplates = {
     }
 };
 
-// Export for ES6 modules (future use)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PageTemplates;
-}

@@ -5,7 +5,73 @@
  * @description Main application entry point and controller
  */
 
-const App = {
+import { CONFIG } from './config.js';
+import { Utils } from './utils.js';
+import { Validators } from './validators.js';
+import { storage } from './storage.js';
+import { Notifications } from './notifications.js';
+import { Modal } from './modal.js';
+import { Navigation } from './navigation.js';
+import { PageTemplates } from './templates.js';
+import { CrudManager } from './crud.js';
+import { PDFExport } from './pdf-export.js';
+import { Reminders } from './reminders.js';
+import { DashboardKPI } from './dashboard-kpi.js';
+import { GlobalSearch } from './global-search.js';
+import { AuditLog } from './audit-log.js';
+import { CsvExport } from './csv-export.js';
+import { DarkMode } from './dark-mode.js';
+
+// Expose modules to global scope for inline event handlers and legacy compatibility
+window.CONFIG = CONFIG;
+window.Utils = Utils;
+window.Validators = Validators;
+window.storage = storage;
+window.Notifications = Notifications;
+window.Modal = Modal;
+window.Navigation = Navigation;
+window.PageTemplates = PageTemplates;
+window.CrudManager = CrudManager;
+window.PDFExport = PDFExport;
+window.Reminders = Reminders;
+window.DashboardKPI = DashboardKPI;
+window.GlobalSearch = GlobalSearch;
+window.AuditLog = AuditLog;
+window.CsvExport = CsvExport;
+window.DarkMode = DarkMode;
+
+// Also expose global functions expected by inline HTML handlers
+window.showPage = (pageId) => Navigation.showPage(pageId);
+window.exportData = () => App.exportData();
+window.importData = () => App.importData();
+window.handleImportFile = (event) => App.handleImportFile(event);
+window.showStats = () => App.showStats();
+window.showHelp = () => App.showHelp();
+window.saveFacilityData = async () => await App.saveFacilityData();
+window.addProcedure = () => CrudManager.procedures.add();
+window.editProcedure = (id) => CrudManager.procedures.edit(id);
+window.addHazard = () => CrudManager.hazards.add();
+window.editHazard = (id) => CrudManager.hazards.edit(id);
+window.addDelivery = () => CrudManager.deliveries.add();
+window.viewDelivery = (index) => CrudManager.deliveries.view(index);
+window.editDelivery = (index) => CrudManager.deliveries.edit(index);
+window.deleteDelivery = (index) => CrudManager.deliveries.delete(index);
+window.addTemperatureRecord = () => CrudManager.temperature.add();
+window.deleteTemperatureRecord = (index) => CrudManager.temperature.delete(index);
+window.addCorrectiveAction = () => CrudManager.correctiveActions.add();
+window.viewCorrectiveAction = (index) => CrudManager.correctiveActions.view(index);
+window.addTraining = () => CrudManager.trainings.add();
+window.viewTraining = (index) => CrudManager.trainings.view(index);
+window.addAudit = () => CrudManager.audits.add();
+window.viewAudit = (index) => CrudManager.audits.view(index);
+window.addTest = () => CrudManager.tests.add();
+window.viewTest = (index) => CrudManager.tests.view(index);
+window.editFlowChart = () => CrudManager.flowChart.edit();
+window.showPdfExportDialog = () => App.showPdfExportDialog();
+window.toggleRemindersPanel = () => App.toggleRemindersPanel();
+window.showCsvExportDialog = () => CsvExport.showExportDialog();
+
+export const App = {
     /**
      * Application state
      */
@@ -52,180 +118,166 @@ const App = {
     },
 
     /**
-     * Initialize CSS animations
+     * Initialize animations
      */
     initAnimations() {
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOutRight {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-            @keyframes pulse {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-            }
-        `;
-        document.head.appendChild(style);
+        // Simple fade in for main content
+        const main = document.querySelector('main');
+        if (main) {
+            main.classList.add('fade-in');
+        }
     },
 
     /**
      * Initialize navigation
      */
     initNavigation() {
-        Navigation.init();
+        // Handle initial hash or default page
+        const hash = window.location.hash.slice(1);
+        if (hash) {
+            Navigation.showPage(hash);
+        } else {
+            Navigation.showPage('welcome');
+        }
+
+        // Handle browser back/forward
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.pageId) {
+                Navigation.showPage(event.state.pageId, false);
+            }
+        });
     },
 
     /**
-     * Initialize event listeners
+     * Initialize global event listeners
      */
     initEventListeners() {
-        // Online/Offline events
+        // Online/Offline status
         window.addEventListener('online', () => {
             this.state.online = true;
-            document.getElementById('offline-indicator').style.display = 'none';
-            Notifications.success('Połączono z internetem');
+            Notifications.success('Połączenie z internetem przywrócone');
+            this.updateOnlineStatus();
         });
 
         window.addEventListener('offline', () => {
             this.state.online = false;
-            document.getElementById('offline-indicator').style.display = 'block';
-            Notifications.warning('Tryb offline - dane zapisywane lokalnie');
+            Notifications.warning('Brak połączenia z internetem. Tryb offline aktywny.');
+            this.updateOnlineStatus();
         });
 
-        // Initial offline check
-        if (!navigator.onLine) {
-            document.getElementById('offline-indicator').style.display = 'block';
-        }
-
-        // Keyboard shortcuts
+        // Global keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Alt + H = Home
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                GlobalSearch.open();
+            }
             if (e.altKey && e.key === 'h') {
                 e.preventDefault();
                 Navigation.showPage('welcome');
             }
-            // Alt + D = Dashboard
             if (e.altKey && e.key === 'd') {
                 e.preventDefault();
                 Navigation.showPage('dashboard');
             }
-            // Alt + E = Export
             if (e.altKey && e.key === 'e') {
                 e.preventDefault();
-                this.exportData();
+                this.showPdfExportDialog();
             }
         });
-
-        // Form auto-save with debounce
-        document.addEventListener('input', Utils.debounce((e) => {
-            if (e.target.closest('#facility-form')) {
-                this.autoSaveFacility();
-            }
-        }, 1000));
     },
 
     /**
      * Initialize accessibility features
      */
     initAccessibility() {
-        // Create ARIA live region
-        Utils.createAnnouncer();
-
-        // Skip link
-        const skipLink = Utils.createElement('a', {
-            href: '#main-content',
-            className: 'skip-link',
-            onClick: (e) => {
-                e.preventDefault();
-                const main = document.querySelector('.main-content');
-                if (main) {
-                    main.setAttribute('tabindex', '-1');
-                    main.focus();
-                }
+        // Add focus outline styles if user is using keyboard
+        document.body.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                document.body.classList.add('user-is-tabbing');
             }
-        }, 'Przejdź do treści głównej');
-        document.body.insertBefore(skipLink, document.body.firstChild);
+        });
 
-        // Add main landmark
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            mainContent.setAttribute('role', 'main');
-            mainContent.id = 'main-content';
-        }
-
-        // Add header landmark
-        const header = document.querySelector('.header');
-        if (header) {
-            header.setAttribute('role', 'banner');
-        }
-
-        // Improve button accessibility
-        document.querySelectorAll('.nav-btn, .module-card').forEach(el => {
-            if (!el.getAttribute('aria-label') && !el.textContent.trim()) {
-                const icon = el.querySelector('i');
-                if (icon) {
-                    el.setAttribute('aria-label', icon.className);
-                }
-            }
+        document.body.addEventListener('mousedown', () => {
+            document.body.classList.remove('user-is-tabbing');
         });
     },
 
     /**
-     * Register page load callbacks
+     * Register callbacks for page loads
      */
     registerPageCallbacks() {
-        Navigation.onPageLoad('dashboard', () => this.loadDashboardKPI());
-        Navigation.onPageLoad('opis-zakladu', () => this.loadFacilityData());
-        Navigation.onPageLoad('ghp-gmp', () => CrudManager.procedures.display());
-        Navigation.onPageLoad('schemat', () => CrudManager.flowChart.display());
-        Navigation.onPageLoad('analiza', () => CrudManager.hazards.display());
-        Navigation.onPageLoad('rejestry', async () => {
-            await CrudManager.temperature.display();
-            await CrudManager.deliveries.display();
+        // Dashboard
+        Navigation.onPageLoad('dashboard', () => {
+            DashboardKPI.init();
         });
-        Navigation.onPageLoad('korekty', () => CrudManager.correctiveActions.display());
-        Navigation.onPageLoad('szkolenia', () => CrudManager.trainings.display());
-        Navigation.onPageLoad('audyty', () => CrudManager.audits.display());
-        Navigation.onPageLoad('badania', () => CrudManager.tests.display());
+
+        // Registers
+        Navigation.onPageLoad('rejestry', () => {
+            // Initialize register tabs or specific logic
+        });
     },
 
     /**
-     * Load KPI Dashboard
+     * Update online status indicator
      */
-    async loadDashboardKPI() {
-        if (typeof DashboardKPI !== 'undefined') {
-            await DashboardKPI.render();
+    updateOnlineStatus() {
+        const indicator = document.querySelector('.status-indicator');
+        if (indicator) {
+            indicator.className = `status-indicator ${this.state.online ? 'online' : 'offline'}`;
+            indicator.innerHTML = `<i class="fas fa-${this.state.online ? 'wifi' : 'wifi-slash'}"></i> ${this.state.online ? 'Online' : 'Offline'}`;
         }
     },
 
     /**
-     * Load facility data
+     * Handle file import
      */
-    async loadFacilityData() {
-        const data = await storage.load('facility');
-        if (!data) return;
+    async handleImportFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-        const form = document.getElementById('facility-form');
-        if (!form) return;
+        const loading = Notifications.loading('Importowanie danych...');
 
-        // Populate form fields
-        Object.entries(data).forEach(([key, value]) => {
-            const input = form.querySelector(`[name="${key}"]`);
-            if (input) {
-                input.value = value || '';
-            }
-        });
+        try {
+            const text = await Utils.readFileAsText(file);
+            const data = JSON.parse(text);
 
-        // Setup form submission
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            await this.saveFacilityData();
-        };
+            await storage.importData(data);
+
+            loading.success('Dane zostały zaimportowane pomyślnie');
+            setTimeout(() => window.location.reload(), 1500);
+        } catch (error) {
+            console.error('[App] Import error:', error);
+            loading.error('Błąd podczas importu danych: ' + error.message);
+        }
+
+        // Reset input
+        event.target.value = '';
+    },
+
+    /**
+     * Export all data
+     */
+    async exportData() {
+        const loading = Notifications.loading('Przygotowywanie eksportu...');
+        try {
+            const data = await storage.exportData();
+            const json = JSON.stringify(data, null, 2);
+            const date = new Date().toISOString().split('T')[0];
+
+            Utils.downloadFile(json, `inovit-haccp-backup-${date}.json`, 'application/json');
+
+            loading.success('Eksport zakończony pomyślnie');
+        } catch (error) {
+            console.error('[App] Export error:', error);
+            loading.error('Błąd podczas eksportu danych');
+        }
+    },
+
+    /**
+     * Import data trigger
+     */
+    importData() {
+        document.getElementById('import-file-input').click();
     },
 
     /**
@@ -235,152 +287,37 @@ const App = {
         const form = document.getElementById('facility-form');
         if (!form) return;
 
+        // Basic validation
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
-        // Validate
-        const validation = Validators.validateForm(data, {
-            name: ['required', { minLength: 2 }]
-        });
-
-        if (!validation.isValid) {
-            Validators.showFormErrors(form, validation.errors);
-            Notifications.warning('Popraw błędy w formularzu');
-            return;
-        }
-
-        // Save
-        const btn = document.getElementById('save-facility-btn');
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Zapisywanie...';
-        }
-
-        try {
-            data.lastModified = new Date().toISOString();
-            await storage.save('facility', data);
-            Notifications.success('Dane zakładu zostały zapisane');
-        } catch (error) {
-            console.error('[App] Save error:', error);
-            Notifications.error('Błąd podczas zapisywania danych');
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> Zapisz dane';
-            }
-        }
-    },
-
-    /**
-     * Auto-save facility data (debounced)
-     */
-    async autoSaveFacility() {
-        const form = document.getElementById('facility-form');
-        if (!form) return;
-
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        data.lastModified = new Date().toISOString();
-        data.autoSaved = true;
+        const loading = Notifications.loading('Zapisywanie...');
 
         try {
             await storage.save('facility', data);
-            // Silent save - no notification for autosave
+            loading.success('Dane zakładu zostały zapisane');
         } catch (error) {
-            console.error('[App] Autosave error:', error);
+            console.error('[App] Save facility error:', error);
+            loading.error('Błąd zapisu danych');
         }
     },
 
     /**
-     * Export all data
-     */
-    async exportData() {
-        const loading = Notifications.loading('Eksportowanie danych...');
-
-        try {
-            const data = await storage.exportData();
-            const json = JSON.stringify(data, null, 2);
-            const filename = `inovit-haccp-export-${Utils.getCurrentDate()}.json`;
-            Utils.downloadFile(json, filename, 'application/json');
-            loading.success('Dane zostały wyeksportowane');
-        } catch (error) {
-            console.error('[App] Export error:', error);
-            loading.error('Błąd podczas eksportu danych');
-        }
-    },
-
-    /**
-     * Import data
-     */
-    importData() {
-        document.getElementById('import-file-input').click();
-    },
-
-    /**
-     * Handle import file
-     */
-    async handleImportFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // Validate file
-        if (!Validators.fileType(file, ['application/json'])) {
-            Notifications.error('Nieprawidłowy typ pliku. Wybierz plik JSON.');
-            return;
-        }
-
-        if (!Validators.fileSize(file, CONFIG.UI.MAX_FILE_SIZE)) {
-            Notifications.error(`Plik jest zbyt duży. Maksymalny rozmiar: ${Utils.formatBytes(CONFIG.UI.MAX_FILE_SIZE)}`);
-            return;
-        }
-
-        const confirmed = await Modal.confirm(
-            'Czy na pewno chcesz zaimportować dane? Obecne dane mogą zostać nadpisane.',
-            { title: 'Potwierdzenie importu', confirmText: 'Importuj', icon: 'fas fa-upload' }
-        );
-
-        if (!confirmed) {
-            event.target.value = '';
-            return;
-        }
-
-        const loading = Notifications.loading('Importowanie danych...');
-
-        try {
-            const text = await Utils.readFileAsText(file);
-            const data = Utils.parseJSON(text);
-
-            if (!data) {
-                throw new Error('Invalid JSON');
-            }
-
-            const result = await storage.importData(data);
-
-            if (result.success) {
-                loading.success('Dane zostały zaimportowane. Odświeżanie strony...');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            console.error('[App] Import error:', error);
-            loading.error('Błąd podczas importowania danych');
-        }
-
-        event.target.value = '';
-    },
-
-    /**
-     * Show statistics
+     * Show storage stats
      */
     async showStats() {
-        const loading = Modal.loading('Ładowanie statystyk...');
-
+        const loading = Notifications.loading('Pobieranie statystyk...');
         try {
             const stats = await storage.getStats();
+            loading.dismiss();
 
             Modal.open({
-                title: 'Statystyki aplikacji',
+                title: 'Statystyki pamięci',
                 content: `
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -571,124 +508,7 @@ const App = {
     }
 };
 
-// Legacy support - global functions
-function showPage(pageId) {
-    Navigation.showPage(pageId);
-}
-
-function exportData() {
-    App.exportData();
-}
-
-function importData() {
-    App.importData();
-}
-
-function handleImportFile(event) {
-    App.handleImportFile(event);
-}
-
-function showStats() {
-    App.showStats();
-}
-
-function showHelp() {
-    App.showHelp();
-}
-
-// Legacy CRUD functions for backwards compatibility
-async function saveFacilityData() {
-    await App.saveFacilityData();
-}
-
-function addProcedure() {
-    CrudManager.procedures.add();
-}
-
-function editProcedure(id) {
-    CrudManager.procedures.edit(id);
-}
-
-function addHazard() {
-    CrudManager.hazards.add();
-}
-
-function editHazard(id) {
-    CrudManager.hazards.edit(id);
-}
-
-function addDelivery() {
-    CrudManager.deliveries.add();
-}
-
-function viewDelivery(index) {
-    CrudManager.deliveries.view(index);
-}
-
-function editDelivery(index) {
-    CrudManager.deliveries.edit(index);
-}
-
-function deleteDelivery(index) {
-    CrudManager.deliveries.delete(index);
-}
-
-function addTemperatureRecord() {
-    CrudManager.temperature.add();
-}
-
-function deleteTemperatureRecord(index) {
-    CrudManager.temperature.delete(index);
-}
-
-function addCorrectiveAction() {
-    CrudManager.correctiveActions.add();
-}
-
-function viewCorrectiveAction(index) {
-    CrudManager.correctiveActions.view(index);
-}
-
-function addTraining() {
-    CrudManager.trainings.add();
-}
-
-function viewTraining(index) {
-    CrudManager.trainings.view(index);
-}
-
-function addAudit() {
-    CrudManager.audits.add();
-}
-
-function viewAudit(index) {
-    CrudManager.audits.view(index);
-}
-
-function addTest() {
-    CrudManager.tests.add();
-}
-
-function viewTest(index) {
-    CrudManager.tests.view(index);
-}
-
-function editFlowChart() {
-    CrudManager.flowChart.edit();
-}
-
-function showPdfExportDialog() {
-    App.showPdfExportDialog();
-}
-
-function toggleRemindersPanel() {
-    App.toggleRemindersPanel();
-}
+window.App = App;
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => App.init());
-
-// Export for ES6 modules (future use)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = App;
-}

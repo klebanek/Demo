@@ -1,10 +1,14 @@
+import { Utils } from "./utils.js";
+import { storage } from "./storage.js";
+import { Notifications } from "./notifications.js";
+import { Modal } from "./modal.js";
 /**
  * INOVIT HACCP - CSV Export Module
  * @module csv-export
  * @description Export data to CSV format
  */
 
-const CsvExport = {
+export const CsvExport = {
     /**
      * Module configurations for CSV export
      */
@@ -295,11 +299,3 @@ const CsvExport = {
 };
 
 // Add global function for easy access
-function showCsvExportDialog() {
-    CsvExport.showExportDialog();
-}
-
-// Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CsvExport;
-}

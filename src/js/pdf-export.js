@@ -1,10 +1,15 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
+import { storage } from "./storage.js";
+import { Notifications } from "./notifications.js";
+import { Modal } from "./modal.js";
 /**
  * INOVIT HACCP - PDF Export Module
  * @module pdf-export
  * @description Generate PDF reports from application data
  */
 
-const PDFExport = {
+export const PDFExport = {
     /**
      * jsPDF instance
      */
@@ -936,7 +941,3 @@ function exportToPDF() {
     PDFExport.showExportDialog();
 }
 
-// Export for ES6 modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PDFExport;
-}

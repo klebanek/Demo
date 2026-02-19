@@ -1,10 +1,12 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
 /**
  * INOVIT HACCP - Modal Module
  * @module modal
  * @description Modal dialog system with accessibility support
  */
 
-const Modal = {
+export const Modal = {
     /**
      * Active modal stack
      */
@@ -556,7 +558,3 @@ function closeModalOnOverlay(event) {
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => Modal.init());
 
-// Export for ES6 modules (future use)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Modal;
-}

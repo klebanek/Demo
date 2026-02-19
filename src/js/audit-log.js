@@ -1,10 +1,12 @@
+import { CONFIG } from "./config.js";
+import { storage } from "./storage.js";
 /**
  * INOVIT HACCP - Audit Log Module
  * @module audit-log
  * @description Track all changes made in the application
  */
 
-const AuditLog = {
+export const AuditLog = {
     STORAGE_KEY: 'auditLog',
     MAX_ENTRIES: 500,
 
@@ -357,6 +359,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = AuditLog;
-}

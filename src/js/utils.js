@@ -4,7 +4,7 @@
  * @description Helper functions for security, validation, and DOM manipulation
  */
 
-const Utils = {
+export const Utils = {
     /**
      * Escape HTML to prevent XSS attacks
      * @param {string} text - Text to escape
