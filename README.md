@@ -1,7 +1,7 @@
 # INOVIT e-Segregator HACCP - Progressive Web App
 
 ![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 Nowoczesna aplikacja PWA (Progressive Web App) do zarządzania dokumentacją HACCP z pełnym wsparciem dla zapisu lokalnego i pracy offline.
@@ -14,7 +14,10 @@ INOVIT e-Segregator HACCP to kompleksowy system zarządzania dokumentacją HACCP
 - 💾 **Lokalny zapis danych** - localStorage + IndexedDB
 - 📱 **Instalacja jako aplikacja** - PWA można zainstalować na urządzeniu
 - 🔄 **Automatyczna synchronizacja** - dane zapisywane są automatycznie
-- 📊 **Eksport/Import danych** - możliwość kopii zapasowych
+- 📊 **Zaawansowane raporty** - eksport do PDF i CSV
+- 🌙 **Dark Mode** - tryb ciemny dla lepszego komfortu pracy
+- 🔔 **Powiadomienia i przypomnienia** - system zarządzania terminami
+- 🔍 **Globalne wyszukiwanie** - szybkie odnajdywanie informacji
 - 🎨 **Responsywny design** - działa na komputerach, tabletach i smartfonach
 
 ## 🚀 Funkcjonalności
@@ -30,6 +33,14 @@ INOVIT e-Segregator HACCP to kompleksowy system zarządzania dokumentacją HACCP
 8. **Szkolenia pracowników** - plan i harmonogram
 9. **Audyty i weryfikacja** - kontrola wewnętrzna
 10. **Plan i rejestr badań** - badania laboratoryjne
+
+### Nowe funkcjonalności (v2.1.0):
+- 📄 **Eksport do PDF** - generowanie profesjonalnych raportów
+- 📊 **Eksport do CSV** - możliwość dalszej analizy danych w arkuszach kalkulacyjnych
+- 🌓 **Tryb ciemny (Dark Mode)** - automatyczne wykrywanie preferencji systemowych i przełącznik ręczny
+- ⏰ **System przypomnień** - powiadomienia o terminach badań, szkoleń i audytów
+- 🔎 **Wyszukiwarka globalna** - przeszukiwanie wszystkich modułów aplikacji
+- 📱 **Ulepszony interfejs PWA** - lepsza integracja z systemem operacyjnym
 
 ### Technologie PWA:
 - ⚡ **Service Worker** - obsługa offline i cache
@@ -47,49 +58,59 @@ Demo/
 │   │   └── styles.css          # Style aplikacji
 │   ├── js/
 │   │   ├── app.js              # Główna logika aplikacji
-│   │   └── storage.js          # Zarządzanie localStorage/IndexedDB
+│   │   ├── storage.js          # Zarządzanie localStorage/IndexedDB
+│   │   ├── dark-mode.js        # Obsługa trybu ciemnego
+│   │   ├── pdf-export.js       # Eksport do PDF
+│   │   ├── csv-export.js       # Eksport do CSV
+│   │   ├── global-search.js    # Wyszukiwarka
+│   │   └── reminders.js        # System przypomnień
 │   ├── icons/
 │   │   ├── icon-*.svg          # Ikony PWA (różne rozmiary)
 │   │   └── README.md           # Informacje o ikonach
 │   ├── index.html              # Główny plik HTML
 │   ├── manifest.json           # Manifest PWA
 │   └── sw.js                   # Service Worker
+├── src/                        # Pliki źródłowe
+├── tests/                      # Testy jednostkowe
+├── vite.config.js              # Konfiguracja Vite
+├── package.json                # Zależności i skrypty
 ├── generate-icons.sh           # Skrypt generujący ikony
-├── demo_source.html            # Oryginalne demo (backup)
 └── README.md                   # Ten plik
 ```
 
 ## 🛠️ Instalacja i uruchomienie
 
 ### Wymagania:
-- Serwer HTTP (np. Live Server, Python HTTP Server, nginx)
-- Nowoczesna przeglądarka (Chrome, Firefox, Safari, Edge)
+- Node.js (wersja 16 lub nowsza)
+- npm (menedżer pakietów Node.js)
 
-### Opcja 1: Live Server (VS Code)
+### Krok 1: Instalacja zależności
 ```bash
-# Zainstaluj rozszerzenie Live Server w VS Code
-# Kliknij prawym przyciskiem na index.html -> "Open with Live Server"
+npm install
 ```
 
-### Opcja 2: Python HTTP Server
+### Krok 2: Uruchomienie w trybie deweloperskim
 ```bash
-cd public
+npm run dev
+# Aplikacja będzie dostępna pod adresem http://localhost:5173 (lub inny port wskazany przez Vite)
+```
+
+### Krok 3: Budowanie wersji produkcyjnej
+```bash
+npm run build
+```
+
+### Krok 4: Podgląd wersji produkcyjnej
+```bash
+npm run preview
+```
+
+### Alternatywne metody uruchomienia (bez Node.js):
+Możesz nadal uruchomić aplikację używając prostego serwera HTTP w katalogu `public`, ale zalecany jest workflow oparty na Vite.
+
+```bash
+# Python HTTP Server
 python3 -m http.server 8000
-# Otwórz http://localhost:8000 w przeglądarce
-```
-
-### Opcja 3: Node.js http-server
-```bash
-npm install -g http-server
-cd public
-http-server -p 8000
-# Otwórz http://localhost:8000 w przeglądarce
-```
-
-### Opcja 4: PHP Built-in Server
-```bash
-cd public
-php -S localhost:8000
 # Otwórz http://localhost:8000 w przeglądarce
 ```
 
@@ -124,13 +145,9 @@ php -S localhost:8000
 // Wybierz wcześniej wyeksportowany plik JSON
 ```
 
-### Statystyki:
-```javascript
-// Kliknij "Statystyki" aby zobaczyć:
-// - Wykorzystanie localStorage
-// - Liczba rekordów w IndexedDB
-// - Status połączenia (online/offline)
-```
+### Nowe opcje eksportu:
+- **Eksport PDF**: Generuje sformatowany dokument z tabelami i danymi.
+- **Eksport CSV**: Pobiera dane w formacie CSV do otwarcia w Excelu.
 
 ## 🔧 Konfiguracja
 
@@ -146,26 +163,6 @@ php -S localhost:8000
 }
 ```
 
-### Generowanie własnych ikon:
-
-#### Używając dostarczonego skryptu:
-```bash
-./generate-icons.sh
-```
-
-#### Używając ImageMagick (jeśli dostępny):
-```bash
-# Konwersja SVG na PNG
-cd public/icons
-for size in 72 96 128 144 152 192 384 512; do
-    convert icon-${size}x${size}.svg icon-${size}x${size}.png
-done
-```
-
-#### Używając generatorów online:
-- [RealFaviconGenerator](https://realfavicongenerator.net/)
-- [PWA Builder](https://www.pwabuilder.com/)
-
 ## 📊 API Storage Manager
 
 ### Podstawowe operacje:
@@ -179,40 +176,13 @@ await storage.save('facility', {
 
 // Odczyt danych
 const facilityData = await storage.load('facility');
-
-// Dodanie rekordu
-await storage.addItem('temperatureLog', {
-    date: '2025-01-17',
-    device: 'Chłodnia nr 1',
-    temperature: 2
-});
-
-// Aktualizacja rekordu
-await storage.updateItem('temperatureLog', id, {
-    temperature: 3
-});
-
-// Usunięcie rekordu
-await storage.deleteItem('temperatureLog', id);
-
-// Eksport wszystkich danych
-const exportData = await storage.exportData();
-
-// Import danych
-await storage.importData(jsonData);
-
-// Statystyki
-const stats = await storage.getStats();
-
-// Czyszczenie wszystkich danych
-await storage.clearAll();
 ```
 
 ## 🔐 Bezpieczeństwo danych
 
 - ✅ Wszystkie dane przechowywane lokalnie w przeglądarce użytkownika
 - ✅ Brak wysyłania danych do serwera (pełna prywatność)
-- ✅ Szyfrowanie podczas eksportu (opcjonalne - do rozbudowy)
+- ✅ Szyfrowanie danych w IndexedDB
 - ⚠️ **Ważne**: Regularnie wykonuj kopie zapasowe (eksport danych)
 
 ## 🌐 Wsparcie przeglądarek
@@ -234,21 +204,6 @@ await storage.clearAll();
 # Powinien być status "Activated and is running"
 ```
 
-### Dane nie są zapisywane:
-```bash
-# Sprawdź console w DevTools (F12)
-# Sprawdź dostępność localStorage:
-localStorage.setItem('test', 'value')
-localStorage.getItem('test')
-```
-
-### Ikony się nie wyświetlają:
-```bash
-# Sprawdź ścieżki w manifest.json
-# Upewnij się że pliki SVG istnieją w public/icons/
-ls -la public/icons/
-```
-
 ## 📞 Wsparcie
 
 ### INOVIT:
@@ -268,20 +223,13 @@ Jeśli napotkasz problem, stwórz Issue na GitHubie z informacjami:
 
 ### Planowane funkcje:
 - [ ] Synchronizacja z chmurą (opcjonalnie)
-- [ ] Zaawansowane raporty PDF
-- [ ] Powiadomienia push o terminach
 - [ ] Integracja z czytnikami kodów kreskowych
 - [ ] Wielojęzyczność (EN, DE, etc.)
-- [ ] Dark mode
-- [ ] Zaawansowane filtry i wyszukiwanie
-- [ ] Eksport do Excel/CSV
 - [ ] Podpisy cyfrowe dokumentów
 
 ### Technologie do rozbudowy:
 - [ ] TypeScript dla lepszej typu safety
 - [ ] React/Vue dla bardziej złożonego UI
-- [ ] Webpack/Vite dla bundling
-- [ ] Jest/Vitest dla testów
 - [ ] Cypress dla testów E2E
 
 ## 📄 Licencja
@@ -302,19 +250,27 @@ Bazowane na demo dostępnym na: [https://inovit.com.pl/demo2](https://inovit.com
 
 ---
 
-**Wersja:** 1.0.0
+**Wersja:** 2.1.0
 **Data:** 2025-01-17
 **Status:** ✅ Gotowe do użycia
 
 ## 📝 Changelog
+
+### v2.1.0 (2025-01-17)
+- ✨ Dodano tryb ciemny (Dark Mode)
+- 📄 Zaimplementowano eksport do PDF
+- 📊 Zaimplementowano eksport do CSV
+- 🔍 Dodano globalną wyszukiwarkę
+- ⏰ Wdrożono system przypomnień
+- 🧪 Dodano testy jednostkowe (Vitest)
+- ⚡ Migracja do Vite jako narzędzia budującego
+- 🛠️ Ulepszona struktura projektu i konfiguracja
 
 ### v1.0.0 (2025-01-17)
 - ✨ Pierwsza wersja PWA
 - 💾 Pełny zapis lokalny (localStorage + IndexedDB)
 - 📱 Obsługa offline
 - 🎨 Responsywny design
-- 📊 Eksport/Import danych
+- 📊 Eksport/Import danych (JSON)
 - 🔄 Service Worker
 - 📋 10 modułów dokumentacji HACCP
-- 🎯 Manifest PWA
-- 🖼️ Ikony SVG
