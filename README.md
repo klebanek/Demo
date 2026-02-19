@@ -238,7 +238,8 @@ MIT License - możesz swobodnie używać, modyfikować i dystrybuować.
 
 ## 👥 Autorzy
 
-Opracowane przez **INOVIT** - eksperci w cyfryzacji dokumentacji HACCP
+Opracowane przez **INOVIT** - Krzysztof
+Klebaniuk - specjalista ds haccp i zarzadzania jakosci oraz w cyfryzacji dokumentacji HACCP 
 
 Bazowane na demo dostępnym na: [https://inovit.com.pl/demo2](https://inovit.com.pl/demo2)
 
