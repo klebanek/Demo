@@ -1,48 +1,50 @@
-const test = require('node:test');
-const assert = require('node:assert');
-const CsvExport = require('../js/csv-export.js');
+import { describe, it, expect, vi } from 'vitest';
+import { CsvExport } from '../src/js/csv-export.js';
 
-test('CsvExport.escapeCSV', async (t) => {
-    await t.test('should return empty string for null or undefined', () => {
-        assert.strictEqual(CsvExport.escapeCSV(null), '');
-        assert.strictEqual(CsvExport.escapeCSV(undefined), '');
+// Mock dependencies
+vi.mock('../src/js/utils.js', () => ({ Utils: {} }));
+vi.mock('../src/js/storage.js', () => ({ storage: {} }));
+vi.mock('../src/js/notifications.js', () => ({ Notifications: {} }));
+vi.mock('../src/js/modal.js', () => ({ Modal: {} }));
+
+describe('CsvExport.escapeCSV', () => {
+    it('should return empty string for null or undefined', () => {
+        expect(CsvExport.escapeCSV(null)).toBe('');
+        expect(CsvExport.escapeCSV(undefined)).toBe('');
     });
 
-    await t.test('should return simple string as is', () => {
-        assert.strictEqual(CsvExport.escapeCSV('hello'), 'hello');
-        assert.strictEqual(CsvExport.escapeCSV('123'), '123');
+    it('should return simple string as is', () => {
+        expect(CsvExport.escapeCSV('hello')).toBe('hello');
+        expect(CsvExport.escapeCSV('123')).toBe('123');
     });
 
-    await t.test('should wrap in quotes if it contains the separator', () => {
-        assert.strictEqual(CsvExport.escapeCSV('hello;world', ';'), '"hello;world"');
-        // default separator is ;
-        assert.strictEqual(CsvExport.escapeCSV('hello;world'), '"hello;world"');
+    it('should wrap in quotes if it contains the separator', () => {
+        expect(CsvExport.escapeCSV('hello;world', ';')).toBe('"hello;world"');
+        expect(CsvExport.escapeCSV('hello;world')).toBe('"hello;world"');
     });
 
-    await t.test('should wrap in quotes and escape quotes if it contains double quotes', () => {
-        assert.strictEqual(CsvExport.escapeCSV('he"llo'), '"he""llo"');
-        assert.strictEqual(CsvExport.escapeCSV('"quoted"'), '"""quoted"""');
+    it('should wrap in quotes and escape quotes if it contains double quotes', () => {
+        expect(CsvExport.escapeCSV('he"llo')).toBe('"he""llo"');
+        expect(CsvExport.escapeCSV('"quoted"')).toBe('"""quoted"""');
     });
 
-    await t.test('should wrap in quotes if it contains newlines or carriage returns', () => {
-        assert.strictEqual(CsvExport.escapeCSV('hello\nworld'), '"hello\nworld"');
-        assert.strictEqual(CsvExport.escapeCSV('hello\rworld'), '"hello\rworld"');
+    it('should wrap in quotes if it contains newlines or carriage returns', () => {
+        expect(CsvExport.escapeCSV('hello\nworld')).toBe('"hello\nworld"');
+        expect(CsvExport.escapeCSV('hello\rworld')).toBe('"hello\rworld"');
     });
 
-    await t.test('should handle custom separators', () => {
-        assert.strictEqual(CsvExport.escapeCSV('hello,world', ','), '"hello,world"');
-        // if separator is , but string contains ; it should NOT be escaped (unless other conditions met)
-        assert.strictEqual(CsvExport.escapeCSV('hello;world', ','), 'hello;world');
+    it('should handle custom separators', () => {
+        expect(CsvExport.escapeCSV('hello,world', ',')).toBe('"hello,world"');
+        expect(CsvExport.escapeCSV('hello;world', ',')).toBe('hello;world');
     });
 
-    await t.test('should handle non-string values', () => {
-        assert.strictEqual(CsvExport.escapeCSV(123), '123');
-        assert.strictEqual(CsvExport.escapeCSV(true), 'true');
-        assert.strictEqual(CsvExport.escapeCSV(false), 'false');
+    it('should handle non-string values', () => {
+        expect(CsvExport.escapeCSV(123)).toBe('123');
+        expect(CsvExport.escapeCSV(true)).toBe('true');
+        expect(CsvExport.escapeCSV(false)).toBe('false');
     });
 
-    await t.test('should handle combination of triggers', () => {
-        // contains both separator and quotes
-        assert.strictEqual(CsvExport.escapeCSV('hello;"world"', ';'), '"hello;""world"""');
+    it('should handle combination of triggers', () => {
+        expect(CsvExport.escapeCSV('hello;"world"', ';')).toBe('"hello;""world"""');
     });
 });

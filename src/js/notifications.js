@@ -1,10 +1,12 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
 /**
  * INOVIT HACCP - Notifications Module
  * @module notifications
  * @description Toast notifications and alert system
  */
 
-const Notifications = {
+export const Notifications = {
     /**
      * Container element for notifications
      */
@@ -293,11 +295,3 @@ const Notifications = {
 };
 
 // Legacy support - alias for old showNotification function
-function showNotification(message, type = 'info') {
-    return Notifications.show(message, type);
-}
-
-// Export for ES6 modules (future use)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Notifications;
-}

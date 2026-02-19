@@ -1,3 +1,4 @@
+import { CONFIG } from "./config.js";
 /**
  * INOVIT HACCP - Advanced Local Storage Manager
  * Supports localStorage, IndexedDB, and automatic sync
@@ -138,7 +139,7 @@ const CryptoHelper = {
     }
 };
 
-class StorageManager {
+export class StorageManager {
     constructor() {
         this.dbName = typeof CONFIG !== 'undefined' ? CONFIG.STORAGE.DB_NAME : 'inovit-haccp-db';
         this.dbVersion = (typeof CONFIG !== 'undefined' ? CONFIG.STORAGE.DB_VERSION : 2) + 1; // Bump version for settings store
@@ -238,16 +239,12 @@ class StorageManager {
         try {
             await this.ready();
 
-            // Save to localStorage first (always works)
-            await this.saveToLocalStorage(storeName, data);
-
-            // Save to IndexedDB if available
+            // Only save to IndexedDB
             if (this.db) {
                 await this.saveToIndexedDB(storeName, data);
+                return { success: true, message: 'Dane zapisane pomyślnie' };
             }
-
-            console.log(`[Storage] Saved ${storeName}:`, Array.isArray(data) ? `${data.length} items` : 'object');
-            return { success: true, message: 'Dane zapisane pomyślnie' };
+            throw new Error("IndexedDB unavailable");
         } catch (error) {
             console.error('[Storage] Save error:', error);
             return { success: false, message: 'Błąd podczas zapisywania', error };
@@ -327,31 +324,28 @@ class StorageManager {
         try {
             await this.ready();
 
-            // Try localStorage first (most reliable)
-            const localData = await this.loadFromLocalStorage(storeName);
-
-            if (localData !== null && localData !== undefined) {
-                console.log(`[Storage] Loaded ${storeName} from localStorage`);
-                return localData;
-            }
-
-            // Fallback to IndexedDB
+            // 1. Try IndexedDB (Primary)
             if (this.db) {
                 const idbData = await this.loadFromIndexedDB(storeName);
-                if (idbData && idbData.length > 0) {
-                    console.log(`[Storage] Loaded ${storeName} from IndexedDB`);
-                    // Sync back to localStorage
-                    await this.saveToLocalStorage(storeName, idbData);
+                if (idbData && (!Array.isArray(idbData) || idbData.length > 0)) {
                     return idbData;
                 }
             }
 
-            console.log(`[Storage] No data found for ${storeName}`);
-            return null;
+            // 2. Migration: Check localStorage once
+            const localData = await this.loadFromLocalStorage(storeName);
+            if (localData && (!Array.isArray(localData) || localData.length > 0)) {
+                 console.log('[Storage] Migrating ' + storeName + ' to IndexedDB');
+                 if (this.db) {
+                     await this.saveToIndexedDB(storeName, localData);
+                 }
+                 return localData;
+            }
+
+            return [];
         } catch (error) {
             console.error('[Storage] Load error:', error);
-            // Try localStorage as final fallback
-            return await this.loadFromLocalStorage(storeName);
+            return [];
         }
     }
 
@@ -688,4 +682,4 @@ class StorageManager {
 }
 
 // Create global storage instance
-const storage = new StorageManager();
+export const storage = new StorageManager();

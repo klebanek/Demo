@@ -1,10 +1,15 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
+import { storage } from "./storage.js";
+import { Notifications } from "./notifications.js";
+import { Modal } from "./modal.js";
 /**
  * INOVIT HACCP - Reminders Module
  * @module reminders
  * @description System for managing reminders and notifications
  */
 
-const Reminders = {
+export const Reminders = {
     /**
      * Storage key
      */
@@ -831,7 +836,3 @@ function showReminders() {
     Reminders.showPanel();
 }
 
-// Export for ES6 modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Reminders;
-}

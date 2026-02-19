@@ -1,10 +1,16 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
+import { storage } from "./storage.js";
+import { Notifications } from "./notifications.js";
+import { Modal } from "./modal.js";
+import { Validators } from "./validators.js";
 /**
  * INOVIT HACCP - CRUD Manager Module
  * @module crud
  * @description Generic CRUD operations for all data types
  */
 
-const CrudManager = {
+export const CrudManager = {
     /**
      * Current sort state per table
      */
@@ -1609,7 +1615,3 @@ const CrudManager = {
     }
 };
 
-// Export for ES6 modules (future use)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CrudManager;
-}

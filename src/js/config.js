@@ -4,7 +4,7 @@
  * @description Centralized configuration and constants
  */
 
-const CONFIG = {
+export const CONFIG = {
     // Application info
     APP: {
         NAME: 'INOVIT e-Segregator HACCP',

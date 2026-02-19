@@ -27,7 +27,7 @@
         crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./src/css/styles.css">
 </head>
 <body>
     <!-- Skip Link for Accessibility -->
@@ -302,24 +302,7 @@
         integrity="sha512-1r5Jz/GQ9eFMoUxpLfhLZ0M2aQnXbKI3OBNlqDLbLfDYuHSU0kSeiFRrMSo8aNqk/pL7P3FXbT4wX7lZCibD7A=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-    <!-- Scripts - load in correct order -->
-    <script defer src="./js/config.js"></script>
-    <script defer src="./js/utils.js"></script>
-    <script defer src="./js/validators.js"></script>
-    <script defer src="./js/storage.js"></script>
-    <script defer src="./js/notifications.js"></script>
-    <script defer src="./js/modal.js"></script>
-    <script defer src="./js/navigation.js"></script>
-    <script defer src="./js/templates.js"></script>
-    <script defer src="./js/crud.js"></script>
-    <script defer src="./js/pdf-export.js"></script>
-    <script defer src="./js/reminders.js"></script>
-    <script defer src="./js/dashboard-kpi.js"></script>
-    <script defer src="./js/global-search.js"></script>
-    <script defer src="./js/audit-log.js"></script>
-    <script defer src="./js/csv-export.js"></script>
-    <script defer src="./js/dark-mode.js"></script>
-    <script defer src="./js/app.js"></script>
+    <script type="module" src="./src/js/app.js"></script>
 
     <!-- PWA Installation Script -->
     <script>

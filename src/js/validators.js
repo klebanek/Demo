@@ -1,10 +1,11 @@
+import { Utils } from "./utils.js";
 /**
  * INOVIT HACCP - Validators Module
  * @module validators
  * @description Form validation functions
  */
 
-const Validators = {
+export const Validators = {
     /**
      * Validation error messages
      */
@@ -316,7 +317,3 @@ const Validators = {
 Object.freeze(Validators);
 Object.freeze(Validators.messages);
 
-// Export for ES6 modules (future use)
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Validators;
-}

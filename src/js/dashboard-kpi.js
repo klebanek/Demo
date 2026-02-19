@@ -1,10 +1,15 @@
+import { CONFIG } from "./config.js";
+import { Utils } from "./utils.js";
+import { storage } from "./storage.js";
+import { Notifications } from "./notifications.js";
+import { Modal } from "./modal.js";
 /**
  * INOVIT HACCP - Dashboard KPI Module
  * @module dashboard-kpi
  * @description Real-time KPI dashboard with metrics and charts
  */
 
-const DashboardKPI = {
+export const DashboardKPI = {
     /**
      * Initialize KPI dashboard
      */
@@ -420,6 +425,3 @@ const DashboardKPI = {
 };
 
 // Export
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = DashboardKPI;
-}
