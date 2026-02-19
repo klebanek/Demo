@@ -21,6 +21,7 @@ import { GlobalSearch } from './global-search.js';
 import { AuditLog } from './audit-log.js';
 import { CsvExport } from './csv-export.js';
 import { DarkMode } from './dark-mode.js';
+import { registerSW } from 'virtual:pwa-register';
 
 // Expose modules to global scope for inline event handlers and legacy compatibility
 window.CONFIG = CONFIG;
@@ -93,14 +94,14 @@ export const App = {
                 await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
             }
 
+            // Register page load callbacks BEFORE navigation init
+            this.registerPageCallbacks();
+
             // Initialize modules
             this.initAnimations();
             this.initNavigation();
             this.initEventListeners();
             this.initAccessibility();
-
-            // Register page load callbacks
-            this.registerPageCallbacks();
 
             // Initialize reminders system
             this.initReminders();
@@ -207,13 +208,49 @@ export const App = {
      */
     registerPageCallbacks() {
         // Dashboard
-        Navigation.onPageLoad('dashboard', () => {
-            DashboardKPI.init();
+        Navigation.onPageLoad('dashboard', async () => {
+            await DashboardKPI.init();
+        });
+
+        // GHP/GMP
+        Navigation.onPageLoad('ghp-gmp', async () => {
+            await CrudManager.procedures.display();
+        });
+
+        // Schemat
+        Navigation.onPageLoad('schemat', async () => {
+             await CrudManager.flowChart.display();
+        });
+
+        // Analiza
+        Navigation.onPageLoad('analiza', async () => {
+             await CrudManager.hazards.display();
         });
 
         // Registers
-        Navigation.onPageLoad('rejestry', () => {
-            // Initialize register tabs or specific logic
+        Navigation.onPageLoad('rejestry', async () => {
+            await CrudManager.temperature.display();
+            await CrudManager.deliveries.display();
+        });
+
+        // Korekty
+        Navigation.onPageLoad('korekty', async () => {
+             await CrudManager.correctiveActions.display();
+        });
+
+        // Szkolenia
+        Navigation.onPageLoad('szkolenia', async () => {
+             await CrudManager.trainings.display();
+        });
+
+        // Audyty
+        Navigation.onPageLoad('audyty', async () => {
+             await CrudManager.audits.display();
+        });
+
+        // Badania
+        Navigation.onPageLoad('badania', async () => {
+             await CrudManager.tests.display();
         });
     },
 
@@ -441,36 +478,25 @@ export const App = {
      * Check for service worker updates
      */
     async checkForUpdates() {
-        if (!('serviceWorker' in navigator)) return;
-
-        try {
-            const registration = await navigator.serviceWorker.getRegistration();
-            if (!registration) return;
-
-            registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // New version available
-                        Notifications.show('Dostępna nowa wersja aplikacji', 'info', {
-                            duration: 0,
-                            title: 'Aktualizacja',
-                            actions: [
-                                {
-                                    label: 'Odśwież',
-                                    handler: () => {
-                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
-                                        window.location.reload();
-                                    }
-                                }
-                            ]
-                        });
-                    }
+        const updateSW = registerSW({
+            onNeedRefresh() {
+                Notifications.show('Dostępna nowa wersja aplikacji', 'info', {
+                    duration: 0,
+                    title: 'Aktualizacja',
+                    actions: [
+                        {
+                            label: 'Odśwież',
+                            handler: () => {
+                                updateSW(true);
+                            }
+                        }
+                    ]
                 });
-            });
-        } catch (error) {
-            console.warn('[App] Update check failed:', error);
-        }
+            },
+            onOfflineReady() {
+                Notifications.success('Aplikacja gotowa do pracy offline');
+            }
+        });
     },
 
     /**

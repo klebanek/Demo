@@ -309,8 +309,10 @@ export class StorageManager {
                     store.put(itemToSave);
                 });
 
+                // Wait for transaction to complete before resolving
                 transaction.oncomplete = () => resolve();
                 transaction.onerror = () => reject(transaction.error);
+                transaction.onabort = () => reject(new Error('Transaction aborted'));
             } catch (error) {
                 reject(error);
             }

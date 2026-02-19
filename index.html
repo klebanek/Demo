@@ -23,7 +23,7 @@
 
     <!-- Font Awesome with SRI -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"
-        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+
         crossorigin="anonymous" referrerpolicy="no-referrer">
 
     <!-- Styles -->
@@ -295,97 +295,58 @@
     <!-- jsPDF Library for PDF Export -->
     <!-- ⚡ Bolt: Added defer for non-blocking load while maintaining execution order -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-        integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
+
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!-- jsPDF AutoTable Plugin for PDF Tables -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"
-        integrity="sha512-1r5Jz/GQ9eFMoUxpLfhLZ0M2aQnXbKI3OBNlqDLbLfDYuHSU0kSeiFRrMSo8aNqk/pL7P3FXbT4wX7lZCibD7A=="
+
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script type="module" src="./src/js/app.js"></script>
 
     <!-- PWA Installation Script -->
     <script>
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', async () => {
-                try {
-                    const registration = await navigator.serviceWorker.register('./sw.js');
-                    console.log('[PWA] Service Worker registered:', registration.scope);
-
-                    // Check for updates
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // Show update banner
-                                const updateBanner = document.getElementById('update-banner');
-                                if (updateBanner) {
-                                    updateBanner.style.display = 'block';
-                                    document.getElementById('update-button').onclick = () => {
-                                        newWorker.postMessage({ type: 'SKIP_WAITING' });
-                                        window.location.reload();
-                                    };
-                                    document.getElementById('dismiss-update').onclick = () => {
-                                        updateBanner.style.display = 'none';
-                                    };
-                                }
-                            }
-                        });
-                    });
-
-                    // Handle controller change
-                    navigator.serviceWorker.addEventListener('controllerchange', () => {
-                        window.location.reload();
-                    });
-
-                } catch (error) {
-                    console.error('[PWA] Service Worker registration failed:', error);
-                }
-            });
-        }
-
         // PWA Install Prompt
         let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
-        const installButton = document.getElementById('install-button');
-        const dismissButton = document.getElementById('dismiss-install');
+        const installBanner = document.getElementById("install-banner");
+        const installButton = document.getElementById("install-button");
+        const dismissButton = document.getElementById("dismiss-install");
 
-        window.addEventListener('beforeinstallprompt', (e) => {
+        window.addEventListener("beforeinstallprompt", (e) => {
             e.preventDefault();
             deferredPrompt = e;
             if (installBanner) {
-                installBanner.style.display = 'block';
+                installBanner.style.display = "block";
             }
         });
 
         if (installButton) {
-            installButton.addEventListener('click', async () => {
+            installButton.addEventListener("click", async () => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    console.log('[PWA] Install prompt outcome:', outcome);
+                    console.log("[PWA] Install prompt outcome:", outcome);
                     deferredPrompt = null;
                     if (installBanner) {
-                        installBanner.style.display = 'none';
+                        installBanner.style.display = "none";
                     }
                 }
             });
         }
 
         if (dismissButton) {
-            dismissButton.addEventListener('click', () => {
+            dismissButton.addEventListener("click", () => {
                 if (installBanner) {
-                    installBanner.style.display = 'none';
+                    installBanner.style.display = "none";
                 }
             });
         }
 
         // Track PWA installation
-        window.addEventListener('appinstalled', () => {
-            console.log('[PWA] App installed successfully');
+        window.addEventListener("appinstalled", () => {
+            console.log("[PWA] App installed successfully");
             if (installBanner) {
-                installBanner.style.display = 'none';
+                installBanner.style.display = "none";
             }
             deferredPrompt = null;
         });
