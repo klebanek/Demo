@@ -496,8 +496,8 @@ export const Modal = {
                             }
                         }
 
-                        this.close();
                         resolve(data);
+                        this.close();
                     };
 
                     if (onOpen) onOpen(form);

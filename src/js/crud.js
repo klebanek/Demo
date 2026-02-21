@@ -121,8 +121,10 @@ export const CrudManager = {
                 };
                 data.push(newItem);
                 await storage.save(this.storeName, data);
+                // Delay to ensure persistence before refresh
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Procedura została dodana');
-                this.display();
+                await this.display();
             }
         },
 
@@ -189,9 +191,10 @@ export const CrudManager = {
                         if (idx !== -1) {
                             data[idx] = { ...data[idx], ...updates, lastModified: new Date().toISOString() };
                             await storage.save(this.storeName, data);
+                            await new Promise(resolve => setTimeout(resolve, 50));
                             Modal.close();
                             Notifications.success('Procedura została zaktualizowana');
-                            this.display();
+                            await this.display();
                         }
                     };
                 }
@@ -208,9 +211,10 @@ export const CrudManager = {
                 let data = await this.load();
                 data = data.filter(p => p.id !== id);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Modal.close();
                 Notifications.success('Procedura została usunięta');
-                this.display();
+                await this.display();
             }
         }
     },
@@ -278,8 +282,9 @@ export const CrudManager = {
                 const data = await this.load();
                 data.push({ id: Date.now(), ...result, timestamp: new Date().toISOString() });
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Zagrożenie zostało dodane');
-                this.display();
+                await this.display();
             }
         },
 
@@ -313,9 +318,10 @@ export const CrudManager = {
                         if (idx !== -1) {
                             data[idx] = { ...data[idx], ...updates, lastModified: new Date().toISOString() };
                             await storage.save(this.storeName, data);
+                            await new Promise(resolve => setTimeout(resolve, 50));
                             Modal.close();
                             Notifications.success('Zagrożenie zostało zaktualizowane');
-                            this.display();
+                            await this.display();
                         }
                     };
                 }
@@ -327,9 +333,10 @@ export const CrudManager = {
                 let data = await this.load();
                 data = data.filter(h => h.id !== id);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Modal.close();
                 Notifications.success('Zagrożenie zostało usunięte');
-                this.display();
+                await this.display();
             }
         },
 
@@ -457,8 +464,9 @@ export const CrudManager = {
                 };
                 data.push(newItem);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Dostawa została dodana');
-                this.display();
+                await this.display();
             }
         },
 
@@ -509,8 +517,9 @@ export const CrudManager = {
                 if (idx !== -1) {
                     data[idx] = { ...data[idx], ...result, lastModified: new Date().toISOString() };
                     await storage.save(this.storeName, data);
+                    await new Promise(resolve => setTimeout(resolve, 50));
                     Notifications.success('Dostawa została zaktualizowana');
-                    this.display();
+                    await this.display();
                 }
             }
         },
@@ -520,9 +529,10 @@ export const CrudManager = {
                 let data = await this.load();
                 data = data.filter(d => d.id !== id);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Modal.close();
                 Notifications.success('Dostawa została usunięta');
-                this.display();
+                await this.display();
             }
         },
 
@@ -691,8 +701,9 @@ export const CrudManager = {
                 };
                 data.push(newItem);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Pomiar został dodany');
-                this.display();
+                await this.display();
             }
         },
 
@@ -701,8 +712,9 @@ export const CrudManager = {
                 let data = await this.load();
                 data = data.filter(r => r.id !== id);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Pomiar został usunięty');
-                this.display();
+                await this.display();
             }
         }
     },
@@ -772,8 +784,9 @@ export const CrudManager = {
                 };
                 data.push(newItem);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Działanie korygujące zostało dodane');
-                this.display();
+                await this.display();
             }
         },
 
@@ -906,8 +919,9 @@ export const CrudManager = {
                 };
                 data.push(newItem);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Szkolenie zostało dodane');
-                this.display();
+                await this.display();
             }
         },
 
@@ -1034,8 +1048,9 @@ export const CrudManager = {
                 };
                 data.push(newItem);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Audyt został dodany');
-                this.display();
+                await this.display();
             }
         },
 
@@ -1172,8 +1187,9 @@ export const CrudManager = {
                 };
                 data.push(newItem);
                 await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
                 Notifications.success('Badanie zostało dodane');
-                this.display();
+                await this.display();
             }
         },
 
@@ -1363,9 +1379,10 @@ export const CrudManager = {
                         }
 
                         await storage.save(this.storeName, newSteps);
+                        await new Promise(resolve => setTimeout(resolve, 50));
                         Modal.close();
                         Notifications.success('Schemat został zapisany');
-                        this.display();
+                        await this.display();
                     };
                 }
             });
@@ -1570,7 +1587,7 @@ export const CrudManager = {
      */
     setupTableFeatures(tableName) {
         // Setup sortable headers
-        const table = document.querySelector(`#${tableName.replace(/([A-Z])/g, '-$1').toLowerCase()}-table, #${tableName}-table`);
+        const table = document.querySelector(`#${tableName.replace(/([A-Z])/g, '-').toLowerCase()}-table, #${tableName}-table`);
         if (table) {
             // Set cursor on sortable headers
             table.querySelectorAll('th[data-sort]').forEach(th => {
@@ -1592,7 +1609,7 @@ export const CrudManager = {
         }
 
         // Setup search inputs
-        const searchInput = document.querySelector(`#${tableName}-search, #${tableName.replace(/([A-Z])/g, '-$1').toLowerCase()}-search`);
+        const searchInput = document.querySelector(`#${tableName}-search, #${tableName.replace(/([A-Z])/g, '-').toLowerCase()}-search`);
         if (searchInput) {
             searchInput.oninput = Utils.debounce((e) => {
                 this.filterState[tableName] = this.filterState[tableName] || {};
@@ -1603,7 +1620,7 @@ export const CrudManager = {
         }
 
         // Setup filter selects
-        document.querySelectorAll(`[id^="${tableName}-filter"], [id^="${tableName.replace(/([A-Z])/g, '-$1').toLowerCase()}-filter"]`).forEach(select => {
+        document.querySelectorAll(`[id^="${tableName}-filter"], [id^="${tableName.replace(/([A-Z])/g, '-').toLowerCase()}-filter"]`).forEach(select => {
             select.onchange = (e) => {
                 const filterKey = select.id.split('-').pop();
                 this.filterState[tableName] = this.filterState[tableName] || {};
@@ -1614,4 +1631,3 @@ export const CrudManager = {
         });
     }
 };
-
