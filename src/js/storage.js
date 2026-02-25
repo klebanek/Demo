@@ -239,12 +239,15 @@ export class StorageManager {
         try {
             await this.ready();
 
-            // Only save to IndexedDB
+            // Always save to LocalStorage (User Requirement: Persistence)
+            await this.saveToLocalStorage(storeName, data);
+
+            // Also save to IndexedDB if available (for robustness/backup)
             if (this.db) {
                 await this.saveToIndexedDB(storeName, data);
-                return { success: true, message: 'Dane zapisane pomyślnie' };
             }
-            throw new Error("IndexedDB unavailable");
+
+            return { success: true, message: 'Dane zapisane pomyślnie' };
         } catch (error) {
             console.error('[Storage] Save error:', error);
             return { success: false, message: 'Błąd podczas zapisywania', error };
@@ -326,22 +329,20 @@ export class StorageManager {
         try {
             await this.ready();
 
-            // 1. Try IndexedDB (Primary)
+            // 1. Try LocalStorage (Primary as per user request)
+            const localData = await this.loadFromLocalStorage(storeName);
+            if (localData && (!Array.isArray(localData) || localData.length > 0)) {
+                 return localData;
+            }
+
+            // 2. Try IndexedDB (Fallback)
             if (this.db) {
                 const idbData = await this.loadFromIndexedDB(storeName);
                 if (idbData && (!Array.isArray(idbData) || idbData.length > 0)) {
+                    // Sync to LocalStorage if found in IDB but not LS
+                    await this.saveToLocalStorage(storeName, idbData);
                     return idbData;
                 }
-            }
-
-            // 2. Migration: Check localStorage once
-            const localData = await this.loadFromLocalStorage(storeName);
-            if (localData && (!Array.isArray(localData) || localData.length > 0)) {
-                 console.log('[Storage] Migrating ' + storeName + ' to IndexedDB');
-                 if (this.db) {
-                     await this.saveToIndexedDB(storeName, localData);
-                 }
-                 return localData;
             }
 
             return [];

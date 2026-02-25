@@ -79,7 +79,7 @@ export const App = {
     state: {
         initialized: false,
         online: navigator.onLine,
-        currentPage: 'welcome'
+        currentPage: 'dashboard'
     },
 
     /**
@@ -138,7 +138,7 @@ export const App = {
         if (hash) {
             Navigation.showPage(hash);
         } else {
-            Navigation.showPage('welcome');
+            Navigation.showPage('dashboard');
         }
 
         // Handle browser back/forward
@@ -537,4 +537,8 @@ export const App = {
 window.App = App;
 
 // Initialize application
-document.addEventListener('DOMContentLoaded', () => App.init());
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => App.init());
+} else {
+    App.init();
+}

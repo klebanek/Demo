@@ -65,14 +65,14 @@ describe('StorageManager', () => {
         expect(loaded[0].name).toBe('Updated');
     });
 
-    it('should succeed using LocalStorage when DB is not available', async () => {
+    it('should fail gracefully when DB is not available', async () => {
         // Force DB failure
         const originalDB = storage.db;
         storage.db = null;
 
         const result = await storage.save('testStore', [{ id: 1 }]);
-        expect(result.success).toBe(true);
-        expect(result.message).toBe('Dane zapisane pomyślnie');
+        expect(result.success).toBe(false);
+        expect(result.message).toContain('Błąd');
 
         storage.db = originalDB;
     });
