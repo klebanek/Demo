@@ -314,6 +314,15 @@ export const CrudManager = {
                         const formData = new FormData(e.target);
                         const updates = Object.fromEntries(formData.entries());
 
+                        const errors = {};
+                        if (!Validators.required(updates.stage)) errors.stage = ['Etap procesu jest wymagany'];
+                        if (!Validators.required(updates.hazard)) errors.hazard = ['Opis zagrożenia jest wymagany'];
+
+                        if (Object.keys(errors).length > 0) {
+                            Validators.showFormErrors(e.target, errors);
+                            return;
+                        }
+
                         const idx = data.findIndex(h => h.id === id);
                         if (idx !== -1) {
                             data[idx] = { ...data[idx], ...updates, lastModified: new Date().toISOString() };
@@ -510,7 +519,16 @@ export const CrudManager = {
             }
 
             const formHtml = this.getFormHtml(item);
-            const result = await Modal.form(`Edytuj dostawę - ${Utils.escapeHtml(item.supplier || '')}`, formHtml);
+            const result = await Modal.form(`Edytuj dostawę - ${Utils.escapeHtml(item.supplier || '')}`, formHtml, {
+                validation: (data) => {
+                    const errors = {};
+                    if (!Validators.required(data.date)) errors.date = ['Data dostawy jest wymagana'];
+                    if (!Validators.required(data.supplier)) errors.supplier = ['Dostawca jest wymagany'];
+                    if (!Validators.required(data.product)) errors.product = ['Produkt jest wymagany'];
+                    if (!Validators.required(data.quantity)) errors.quantity = ['Ilość jest wymagana'];
+                    return Object.keys(errors).length > 0 ? errors : true;
+                }
+            });
 
             if (result) {
                 const idx = data.findIndex(d => d.id === id);
@@ -810,8 +828,54 @@ export const CrudManager = {
                     <div class="detail-notes"><label>Problem</label><p>${Utils.escapeHtml(a.problem)}</p></div>
                     <div class="detail-notes"><label>Podjęte działanie</label><p>${Utils.escapeHtml(a.actionTaken)}</p></div>
                 `,
-                footer: `<button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>`
+                footer: `
+                    <button class="btn btn-danger" onclick="CrudManager.correctiveActions.delete(${a.id})"><i class="fas fa-trash"></i> Usuń</button>
+                    <button class="btn" onclick="CrudManager.correctiveActions.edit(${a.id})"><i class="fas fa-edit"></i> Edytuj</button>
+                    <button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>
+                `
             });
+        },
+
+        async edit(id) {
+            const data = await this.load();
+            const item = data.find(a => a.id === id);
+            if (!item) {
+                Notifications.error('Nie znaleziono działania');
+                return;
+            }
+
+            const formHtml = this.getFormHtml(item);
+            const result = await Modal.form('Edytuj działanie korygujące', formHtml, {
+                validation: (data) => {
+                    const errors = {};
+                    if (!Validators.required(data.problem)) errors.problem = ['Opis problemu jest wymagany'];
+                    if (!Validators.required(data.actionTaken)) errors.actionTaken = ['Działanie jest wymagane'];
+                    return Object.keys(errors).length > 0 ? errors : true;
+                }
+            });
+
+            if (result) {
+                const idx = data.findIndex(a => a.id === id);
+                if (idx !== -1) {
+                    data[idx] = { ...data[idx], ...result, lastModified: new Date().toISOString() };
+                    await storage.save(this.storeName, data);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    Notifications.success('Działanie zostało zaktualizowane');
+                    await this.display();
+                }
+            }
+        },
+
+        async delete(id) {
+            if (await Modal.confirm('Czy na pewno chcesz usunąć to działanie korygujące?')) {
+                let data = await this.load();
+                data = data.filter(a => a.id !== id);
+                await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
+                Modal.close();
+                Notifications.success('Działanie zostało usunięte');
+                await this.display();
+            }
         },
 
         getFormHtml(item = {}) {
@@ -945,8 +1009,54 @@ export const CrudManager = {
                     </div>
                     ${t.notes ? `<div class="detail-notes"><label>Uwagi</label><p>${Utils.escapeHtml(t.notes)}</p></div>` : ''}
                 `,
-                footer: `<button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>`
+                footer: `
+                    <button class="btn btn-danger" onclick="CrudManager.trainings.delete(${t.id})"><i class="fas fa-trash"></i> Usuń</button>
+                    <button class="btn" onclick="CrudManager.trainings.edit(${t.id})"><i class="fas fa-edit"></i> Edytuj</button>
+                    <button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>
+                `
             });
+        },
+
+        async edit(id) {
+            const data = await this.load();
+            const item = data.find(t => t.id === id);
+            if (!item) {
+                Notifications.error('Nie znaleziono szkolenia');
+                return;
+            }
+
+            const formHtml = this.getFormHtml(item);
+            const result = await Modal.form('Edytuj szkolenie', formHtml, {
+                validation: (data) => {
+                    const errors = {};
+                    if (!Validators.required(data.topic)) errors.topic = ['Temat jest wymagany'];
+                    if (!Validators.required(data.date)) errors.date = ['Data jest wymagana'];
+                    return Object.keys(errors).length > 0 ? errors : true;
+                }
+            });
+
+            if (result) {
+                const idx = data.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    data[idx] = { ...data[idx], ...result, lastModified: new Date().toISOString() };
+                    await storage.save(this.storeName, data);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    Notifications.success('Szkolenie zostało zaktualizowane');
+                    await this.display();
+                }
+            }
+        },
+
+        async delete(id) {
+            if (await Modal.confirm('Czy na pewno chcesz usunąć to szkolenie?')) {
+                let data = await this.load();
+                data = data.filter(t => t.id !== id);
+                await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
+                Modal.close();
+                Notifications.success('Szkolenie zostało usunięte');
+                await this.display();
+            }
         },
 
         getFormHtml(item = {}) {
@@ -1066,8 +1176,8 @@ export const CrudManager = {
                 title: 'Szczegóły audytu',
                 content: `
                     <div class="detail-grid">
-                        <div class="detail-item"><label>Typ</label><span>${Utils.escapeHtml(a.type)}</span></div>
                         <div class="detail-item"><label>Data</label><span>${Utils.escapeHtml(a.date)}</span></div>
+                        <div class="detail-item"><label>Rodzaj</label><span>${Utils.escapeHtml(a.type)}</span></div>
                         <div class="detail-item"><label>Audytor</label><span>${Utils.escapeHtml(a.auditor || '-')}</span></div>
                         <div class="detail-item"><label>Obszar</label><span>${Utils.escapeHtml(a.area || '-')}</span></div>
                         <div class="detail-item"><label>Wynik</label><span class="status ${CrudManager.getAuditResultClass(a.result)}">${Utils.escapeHtml(a.result)}</span></div>
@@ -1075,8 +1185,53 @@ export const CrudManager = {
                     </div>
                     ${a.notes ? `<div class="detail-notes"><label>Uwagi</label><p>${Utils.escapeHtml(a.notes)}</p></div>` : ''}
                 `,
-                footer: `<button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>`
+                footer: `
+                    <button class="btn btn-danger" onclick="CrudManager.audits.delete(${a.id})"><i class="fas fa-trash"></i> Usuń</button>
+                    <button class="btn" onclick="CrudManager.audits.edit(${a.id})"><i class="fas fa-edit"></i> Edytuj</button>
+                    <button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>
+                `
             });
+        },
+
+        async edit(id) {
+            const data = await this.load();
+            const item = data.find(a => a.id === id);
+            if (!item) {
+                Notifications.error('Nie znaleziono audytu');
+                return;
+            }
+
+            const formHtml = this.getFormHtml(item);
+            const result = await Modal.form('Edytuj audyt', formHtml, {
+                validation: (data) => {
+                    const errors = {};
+                    if (!Validators.required(data.date)) errors.date = ['Data jest wymagana'];
+                    return Object.keys(errors).length > 0 ? errors : true;
+                }
+            });
+
+            if (result) {
+                const idx = data.findIndex(a => a.id === id);
+                if (idx !== -1) {
+                    data[idx] = { ...data[idx], ...result, lastModified: new Date().toISOString() };
+                    await storage.save(this.storeName, data);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    Notifications.success('Audyt został zaktualizowany');
+                    await this.display();
+                }
+            }
+        },
+
+        async delete(id) {
+            if (await Modal.confirm('Czy na pewno chcesz usunąć ten audyt?')) {
+                let data = await this.load();
+                data = data.filter(a => a.id !== id);
+                await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
+                Modal.close();
+                Notifications.success('Audyt został usunięty');
+                await this.display();
+            }
         },
 
         getFormHtml(item = {}) {
@@ -1214,8 +1369,53 @@ export const CrudManager = {
                         <div class="detail-item"><label>Status</label><span class="status ${CrudManager.getTestStatusClass(t.status)}">${Utils.escapeHtml(t.status)}</span></div>
                     </div>
                 `,
-                footer: `<button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>`
+                footer: `
+                    <button class="btn btn-danger" onclick="CrudManager.tests.delete(${t.id})"><i class="fas fa-trash"></i> Usuń</button>
+                    <button class="btn" onclick="CrudManager.tests.edit(${t.id})"><i class="fas fa-edit"></i> Edytuj</button>
+                    <button class="btn btn-secondary" onclick="Modal.close()">Zamknij</button>
+                `
             });
+        },
+
+        async edit(id) {
+            const data = await this.load();
+            const item = data.find(t => t.id === id);
+            if (!item) {
+                Notifications.error('Nie znaleziono badania');
+                return;
+            }
+
+            const formHtml = this.getFormHtml(item);
+            const result = await Modal.form('Edytuj badanie', formHtml, {
+                validation: (data) => {
+                    const errors = {};
+                    if (!Validators.required(data.material)) errors.material = ['Materiał jest wymagany'];
+                    return Object.keys(errors).length > 0 ? errors : true;
+                }
+            });
+
+            if (result) {
+                const idx = data.findIndex(t => t.id === id);
+                if (idx !== -1) {
+                    data[idx] = { ...data[idx], ...result, lastModified: new Date().toISOString() };
+                    await storage.save(this.storeName, data);
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    Notifications.success('Badanie zostało zaktualizowane');
+                    await this.display();
+                }
+            }
+        },
+
+        async delete(id) {
+            if (await Modal.confirm('Czy na pewno chcesz usunąć to badanie?')) {
+                let data = await this.load();
+                data = data.filter(t => t.id !== id);
+                await storage.save(this.storeName, data);
+                await new Promise(resolve => setTimeout(resolve, 50));
+                Modal.close();
+                Notifications.success('Badanie zostało usunięte');
+                await this.display();
+            }
         },
 
         getFormHtml(item = {}) {
