@@ -14,7 +14,8 @@ export const DashboardKPI = {
      * Initialize KPI dashboard
      */
     async init() {
-        console.log('[DashboardKPI] Initializing...'); await this.render();
+        console.log('[DashboardKPI] Initializing...');
+        await this.render();
     },
 
     /**
