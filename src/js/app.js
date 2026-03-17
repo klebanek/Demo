@@ -71,6 +71,9 @@ window.editFlowChart = () => CrudManager.flowChart.edit();
 window.showPdfExportDialog = () => App.showPdfExportDialog();
 window.toggleRemindersPanel = () => App.toggleRemindersPanel();
 window.showCsvExportDialog = () => CsvExport.showExportDialog();
+window.closeModal = () => Modal.close();
+window.openModal = (title, bodyContent, footerContent) => Modal.open({ title, content: bodyContent, footer: footerContent });
+window.closeModalOnOverlay = (event) => { if (event.target === event.currentTarget) Modal.close(); };
 
 export const App = {
     /**
