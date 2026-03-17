@@ -86,6 +86,7 @@ export const App = {
      * Initialize application
      */
     async init() {
+        if (this.state.initialized) return;
         console.log('[App] Initializing INOVIT HACCP v2.0...');
 
         try {
@@ -96,6 +97,9 @@ export const App = {
 
             // Register page load callbacks BEFORE navigation init
             this.registerPageCallbacks();
+
+            // Initialize global search BEFORE event listeners (overlay must exist first)
+            GlobalSearch.init();
 
             // Initialize modules
             this.initAnimations();
@@ -166,12 +170,8 @@ export const App = {
             this.updateOnlineStatus();
         });
 
-        // Global keyboard shortcuts
+        // Global keyboard shortcuts (Ctrl+K handled by GlobalSearch.bindKeyboardShortcuts)
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'k') {
-                e.preventDefault();
-                GlobalSearch.open();
-            }
             if (e.altKey && e.key === 'h') {
                 e.preventDefault();
                 Navigation.showPage('welcome');
