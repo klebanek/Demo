@@ -21,7 +21,6 @@ import { GlobalSearch } from './global-search.js';
 import { AuditLog } from './audit-log.js';
 import { CsvExport } from './csv-export.js';
 import { DarkMode } from './dark-mode.js';
-import { registerSW } from 'virtual:pwa-register';
 
 // Expose modules to global scope for inline event handlers and legacy compatibility
 window.CONFIG = CONFIG;
@@ -481,25 +480,33 @@ export const App = {
      * Check for service worker updates
      */
     async checkForUpdates() {
-        const updateSW = registerSW({
-            onNeedRefresh() {
-                Notifications.show('Dostępna nowa wersja aplikacji', 'info', {
-                    duration: 0,
-                    title: 'Aktualizacja',
-                    actions: [
-                        {
-                            label: 'Odśwież',
-                            handler: () => {
-                                updateSW(true);
-                            }
-                        }
-                    ]
+        if (!('serviceWorker' in navigator)) return;
+        try {
+            const registration = await navigator.serviceWorker.register('./sw.js');
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        Notifications.show('Dostępna nowa wersja aplikacji', 'info', {
+                            duration: 0,
+                            title: 'Aktualizacja',
+                            actions: [{
+                                label: 'Odśwież',
+                                handler: () => {
+                                    newWorker.postMessage({ type: 'SKIP_WAITING' });
+                                    window.location.reload();
+                                }
+                            }]
+                        });
+                    }
+                    if (newWorker.state === 'activated' && !navigator.serviceWorker.controller) {
+                        Notifications.success('Aplikacja gotowa do pracy offline');
+                    }
                 });
-            },
-            onOfflineReady() {
-                Notifications.success('Aplikacja gotowa do pracy offline');
-            }
-        });
+            });
+        } catch (error) {
+            console.warn('[App] Service worker registration failed:', error);
+        }
     },
 
     /**
