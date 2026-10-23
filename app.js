@@ -70,6 +70,11 @@
     return (r > 0 ? '+' : MINUS) + fmt(Math.abs(r), d);
   }
   const dir = (v, d = 1) => { const r = round(v, d); return r === 0 ? 'flat' : r < 0 ? 'down' : 'up'; };
+  // Weight precision follows the data: 0.05 kg scales get two decimals.
+  let WD = 1;
+  const kg = (v) => fmt(v, WD);
+  const kgS = (v) => fmtSigned(v, WD);
+  const kgDir = (v) => dir(v, WD);
   const fmtIn = (v) => String(v).replace('.', ',');
   const parseNum = (s) => {
     const v = parseFloat(String(s).replace(/\s/g, '').replace(',', '.'));
@@ -149,26 +154,26 @@
     const first = s[0];
     const chip = last.dDay == null
       ? '<span class="chip">Pierwszy pomiar</span>'
-      : `<span class="chip ${dir(last.dDay)}">${fmtSigned(last.dDay)} kg</span><span>od poprzedniego pomiaru</span>`;
+      : `<span class="chip ${kgDir(last.dDay)}">${kgS(last.dDay)} kg</span><span>od poprzedniego pomiaru</span>`;
     hero.innerHTML = `
       <p class="label">Aktualna waga · ${relDay(last.ts)}</p>
-      <div class="big">${fmt(last.weight)}<small>kg</small></div>
+      <div class="big">${kg(last.weight)}<small>kg</small></div>
       <div class="hero-foot">${chip}</div>`;
 
-    const recent = s.filter((e) => e.ts >= last.ts - 13 * DAY).map((e) => ({ ts: e.ts, v: e.weight }));
+    const recent = s.filter((e) => e.ts >= last.ts - 29 * DAY).map((e) => ({ ts: e.ts, v: e.weight }));
     const slope = slopePerWeek(recent);
     const lastFat = [...s].reverse().find((e) => e.fat != null);
 
     stats.innerHTML = `
       <div class="tile">
         <p class="label">Łącznie</p>
-        <p class="val ${dir(last.dTot)}">${s.length > 1 ? fmtSigned(last.dTot) : '0,0'}<small>kg</small></p>
+        <p class="val ${kgDir(last.dTot)}">${s.length > 1 ? kgS(last.dTot) : kg(0)}<small>kg</small></p>
         <p class="sub">od ${dfShort.format(first.ts)}</p>
       </div>
       <div class="tile">
         <p class="label">Trend</p>
-        <p class="val ${slope == null ? '' : dir(slope)}">${slope == null ? '—' : fmtSigned(slope)}<small>${slope == null ? '' : 'kg/tydz.'}</small></p>
-        <p class="sub">${slope == null ? 'za mało danych' : 'ostatnie 14 dni'}</p>
+        <p class="val ${slope == null ? '' : kgDir(slope)}">${slope == null ? '—' : kgS(slope)}<small>${slope == null ? '' : 'kg/tydz.'}</small></p>
+        <p class="sub">${slope == null ? 'brak danych' : 'ostatnie 30 dni'}</p>
       </div>
       <div class="tile">
         <p class="label">Tłuszcz</p>
@@ -208,6 +213,7 @@
   function renderChart() {
     const metric = prefs.metric;
     const unit = metric === 'weight' ? 'kg' : '%';
+    const D = metric === 'weight' ? WD : 1;
     const s = series();
     let pts = s.filter((e) => e[metric] != null).map((e) => ({ ts: e.ts, date: e.date, v: e[metric] }));
     const tr = ewma(pts.map((p) => p.v));
@@ -242,7 +248,7 @@
     hi += pad_;
     const Y = (v) => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
     const { ticks, step } = niceTicks(lo, hi, 4);
-    const dec = step >= 1 ? 0 : 1;
+    const dec = step >= 1 ? 0 : D;
 
     const trendP = pts.map((p) => ({ x: X(p.ts), y: Y(p.t) }));
     const line = smoothPath(trendP);
@@ -287,17 +293,17 @@
       </svg>
       <div class="tip" id="tip" hidden></div>`;
 
-    cs = { pts, X, Y, W, unit };
+    cs = { pts, X, Y, W, unit, D };
 
     const first = pts[0];
     const change = lp.v - first.v;
     const slope = slopePerWeek(pts.map((p) => ({ ts: p.ts, v: p.v })));
     meta.innerHTML = `
-      <div class="now">${fmt(lp.v)}<small>${unit}</small></div>
+      <div class="now">${fmt(lp.v, D)}<small>${unit}</small></div>
       <div class="legend"><span><i style="background:var(--text3)"></i>pomiar</span><span><i style="background:var(--accent)"></i>trend</span></div>`;
     mini.innerHTML = `
-      <div><p class="label">Zmiana w okresie</p><p class="v ${dir(change)}">${pts.length > 1 ? fmtSigned(change) : '0,0'} ${unit}</p></div>
-      <div><p class="label">Tempo zmian</p><p class="v ${slope == null ? '' : dir(slope)}">${slope == null ? '—' : `${fmtSigned(slope)} ${unit}/tydz.`}</p></div>`;
+      <div><p class="label">Zmiana w okresie</p><p class="v ${dir(change, D)}">${pts.length > 1 ? fmtSigned(change, D) : fmt(0, D)} ${unit}</p></div>
+      <div><p class="label">Tempo zmian</p><p class="v ${slope == null ? '' : dir(slope, D)}">${slope == null ? '—' : `${fmtSigned(slope, D)} ${unit}/tydz.`}</p></div>`;
   }
 
   function scrub(ev) {
@@ -321,7 +327,7 @@
     $('#hovTrend').setAttribute('cy', cs.Y(p.t));
     const tip = $('#tip');
     tip.hidden = false;
-    tip.innerHTML = `<span>${dfRow.format(p.ts)}</span><b>${fmt(p.v)} ${cs.unit}</b><span>trend ${fmt(p.t)} ${cs.unit}</span>`;
+    tip.innerHTML = `<span>${dfRow.format(p.ts)}</span><b>${fmt(p.v, cs.D)} ${cs.unit}</b><span>trend ${fmt(p.t, cs.D)} ${cs.unit}</span>`;
     const w = tip.offsetWidth;
     tip.style.left = `${Math.min(Math.max(x - w / 2, 0), cs.W - w)}px`;
   }
@@ -348,9 +354,9 @@
       const body = shown.map((e) => `
         <tr data-kind="m" data-id="${e.id}">
           <td class="d">${dfShort.format(e.ts)}</td>
-          <td><b>${fmt(e.weight)}</b></td>
-          <td class="${e.dDay == null ? '' : dir(e.dDay)}">${e.dDay == null ? dash : fmtSigned(e.dDay)}</td>
-          <td class="${dir(e.dTot)}">${rows.length === 1 || e === rows[rows.length - 1] ? dash : fmtSigned(e.dTot)}</td>
+          <td><b>${kg(e.weight)}</b></td>
+          <td class="${e.dDay == null ? '' : kgDir(e.dDay)}">${e.dDay == null ? dash : kgS(e.dDay)}</td>
+          <td class="${kgDir(e.dTot)}">${rows.length === 1 || e === rows[rows.length - 1] ? dash : kgS(e.dTot)}</td>
           <td>${e.fat == null ? dash : `${fmt(e.fat)}${e.dFatDay == null ? '' : `<small class="${dir(e.dFatDay)}">${fmtSigned(e.dFatDay)}</small>`}`}</td>
         </tr>`).join('');
       wrap.innerHTML = `
@@ -390,6 +396,7 @@
   function render() {
     $('#today').textContent = dfLong.format(new Date());
     $$('[data-key]').forEach((b) => b.setAttribute('aria-pressed', String(prefs[b.dataset.key] === b.dataset.val)));
+    WD = state.measurements.some((m) => Math.abs(m.weight * 10 - Math.round(m.weight * 10)) > 1e-6) ? 2 : 1;
     renderHero();
     renderChart();
     renderLog();
@@ -421,7 +428,7 @@
     const rows = isM
       ? `
         <label class="row"><span>Data</span><input type="date" name="date" value="${e?.date || today}" max="${today}" required></label>
-        <label class="row"><span>Waga</span><span class="field"><input name="weight" inputmode="decimal" autocomplete="off" placeholder="${lastM ? fmt(lastM.weight) : '0,0'}" value="${e ? fmtIn(e.weight) : ''}"><em>kg</em></span></label>
+        <label class="row"><span>Waga</span><span class="field"><input name="weight" inputmode="decimal" autocomplete="off" placeholder="${lastM ? kg(lastM.weight) : '0,0'}" value="${e ? fmtIn(e.weight) : ''}"><em>kg</em></span></label>
         <label class="row"><span>Tłuszcz</span><span class="field"><input name="fat" inputmode="decimal" autocomplete="off" placeholder="opcjonalnie" value="${e && e.fat != null ? fmtIn(e.fat) : ''}"><em>%</em></span></label>`
       : `
         <label class="row"><span>Data</span><input type="date" name="date" value="${e?.date || today}" max="${today}" required></label>
@@ -471,13 +478,13 @@
 
       if (isM) {
         const w = parseNum(f.weight.value);
-        if (!(w >= 20 && w <= 400)) return fail('Podaj wagę w kg, np. 84,2.', 'weight');
+        if (!(w >= 20 && w <= 400)) return fail('Podaj wagę w kg, np. 84,2 lub 84,15.', 'weight');
         const fatRaw = f.fat.value.trim();
         const fat = fatRaw === '' ? null : parseNum(fatRaw);
         if (fat != null && !(fat >= 1 && fat <= 80)) return fail('Tłuszcz podaj w procentach, np. 27,5.', 'fat');
         if (e) state.measurements = state.measurements.filter((x) => x.id !== e.id);
         state.measurements = state.measurements.filter((x) => x.date !== date); // one measurement per day
-        state.measurements.push({ id: e?.id || uid(), date, weight: round(w, 1), fat: fat == null ? null : round(fat, 1) });
+        state.measurements.push({ id: e?.id || uid(), date, weight: round(w, 2), fat: fat == null ? null : round(fat, 1) });
       } else {
         const dRaw = f.distance.value.trim();
         const distance = dRaw === '' ? 0 : parseNum(dRaw);
