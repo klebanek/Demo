@@ -1,355 +1,91 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="System zarządzania dokumentacją HACCP - bezpieczeństwo żywności w zasięgu ręki">
-    <meta name="theme-color" content="#004F5D">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="INOVIT HACCP">
-
-    <!-- Content Security Policy -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self';">
-
-    <title>INOVIT e-Segregator HACCP</title>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="./manifest.json">
-
-    <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="./icons/icon-72x72.svg">
-    <link rel="apple-touch-icon" href="./icons/icon-192x192.svg">
-
-    <!-- Font Awesome with SRI -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"
-        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer">
-
-    <!-- Styles -->
-    <link rel="stylesheet" href="./src/css/styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Keto</title>
+  <meta name="description" content="Dziennik wagi, tkanki tłuszczowej i aktywności.">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Keto">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Skip Link for Accessibility -->
-    <!-- Dynamically added by JS -->
-
-    <!-- Install PWA Banner -->
-    <div id="install-banner" class="install-banner" style="display: none;" role="alert">
-        <div class="install-banner-content">
-            <i class="fas fa-download" aria-hidden="true"></i>
-            <span>Zainstaluj aplikację na swoim urządzeniu</span>
-            <button id="install-button" class="btn-install" aria-label="Zainstaluj aplikację">Instaluj</button>
-            <button id="dismiss-install" class="btn-dismiss" aria-label="Zamknij baner instalacji">&times;</button>
-        </div>
-    </div>
-
-    <!-- Update Available Banner -->
-    <div id="update-banner" class="update-banner" style="display: none;" role="alert">
-        <div class="update-banner-content">
-            <i class="fas fa-sync-alt" aria-hidden="true"></i>
-            <span>Dostępna jest nowa wersja aplikacji</span>
-            <button id="update-button" class="btn-install">Aktualizuj</button>
-            <button id="dismiss-update" class="btn-dismiss" aria-label="Zamknij">&times;</button>
-        </div>
-    </div>
-
-    <!-- Offline Indicator -->
-    <div id="offline-indicator" class="offline-indicator" style="display: none;" role="status" aria-live="polite">
-        <i class="fas fa-wifi-slash" aria-hidden="true"></i>
-        <span>Tryb offline - dane zapisywane lokalnie</span>
-    </div>
-
-    <!-- Header -->
-    <header class="header" role="banner">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-folder-open" aria-hidden="true"></i>
-                    <div class="logo-text">
-                        <h1>INOVIT</h1>
-                        <p>Precyzyjna dokumentacja | Nowoczesne rozwiązania</p>
-                    </div>
-                </div>
-                <nav class="header-nav" role="navigation" aria-label="Nawigacja główna">
-                    <button class="nav-btn" onclick="showPage('welcome')" aria-label="Strona główna">
-                        <i class="fas fa-home" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Strona główna</span>
-                    </button>
-                    <button class="nav-btn" onclick="GlobalSearch.open()" aria-label="Wyszukaj (Ctrl+K)">
-                        <i class="fas fa-search" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Szukaj</span>
-                    </button>
-                    <button class="nav-btn" onclick="exportData()" aria-label="Eksportuj dane">
-                        <i class="fas fa-download" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Eksport</span>
-                    </button>
-                    <button class="nav-btn" onclick="showPdfExportDialog()" aria-label="Eksport PDF">
-                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
-                        <span class="nav-btn-text">PDF</span>
-                    </button>
-                    <button class="nav-btn" onclick="showCsvExportDialog()" aria-label="Eksport CSV">
-                        <i class="fas fa-file-csv" aria-hidden="true"></i>
-                        <span class="nav-btn-text">CSV</span>
-                    </button>
-                    <button class="nav-btn" onclick="importData()" aria-label="Importuj dane">
-                        <i class="fas fa-upload" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Import</span>
-                    </button>
-                    <button class="nav-btn nav-btn-reminders" onclick="toggleRemindersPanel()" aria-label="Przypomnienia">
-                        <i class="fas fa-bell" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Przypomnienia</span>
-                        <span id="reminders-badge" class="reminders-badge" style="display: none;">0</span>
-                    </button>
-                    <button class="nav-btn" onclick="showStats()" aria-label="Pokaż statystyki">
-                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Statystyki</span>
-                    </button>
-                    <button class="nav-btn" onclick="AuditLog.showLog()" aria-label="Historia zmian">
-                        <i class="fas fa-history" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Historia</span>
-                    </button>
-                    <button class="nav-btn" onclick="showHelp()" aria-label="Pomoc">
-                        <i class="fas fa-question-circle" aria-hidden="true"></i>
-                        <span class="nav-btn-text">Pomoc</span>
-                    </button>
-                </nav>
-            </div>
-        </div>
+  <main class="app">
+    <header class="top">
+      <p class="eyebrow" id="today"></p>
+      <h1>Keto</h1>
     </header>
 
-    <div class="container">
-        <main class="main-content" id="main-content" role="main" aria-label="Główna treść">
+    <section class="card hero" id="hero" aria-live="polite"></section>
+    <section class="stats" id="stats"></section>
 
-            <!-- Welcome Page -->
-            <div id="welcome" class="welcome-page fade-in-up">
-                <div class="welcome-hero">
-                    <h2>Witamy w e-Segregatorze INOVIT</h2>
-                    <p>To nie jest kolejny segregator – to cyfrowa precyzja, której potrzebuje Twój Zakład.<br>
-                    <strong>Wersja PWA z pełnym zapisem lokalnym</strong></p>
-                    <button class="start-btn" onclick="showPage('dashboard')" aria-label="Rozpocznij pracę z aplikacją">
-                        <i class="fas fa-rocket" aria-hidden="true"></i> ROZPOCZNIJ PRACĘ
-                    </button>
-                </div>
-            </div>
-
-            <!-- Dashboard -->
-            <div id="dashboard" class="page-hidden">
-                <div class="content-page fade-in-up">
-                    <div class="page-header">
-                        <h2 class="page-title">Centrum Dokumentacji HACCP</h2>
-                        <button class="back-btn" onclick="showPage('welcome')" aria-label="Powrót do strony głównej">
-                            <i class="fas fa-arrow-left" aria-hidden="true"></i> Strona główna
-                        </button>
-                    </div>
-
-                    <!-- KPI Dashboard Section -->
-                    <div id="kpi-container" class="kpi-container" aria-label="Panel wskaźników KPI">
-                        <!-- KPI will be loaded dynamically -->
-                    </div>
-
-                    <div class="dashboard-grid" role="list">
-                        <article class="module-card" onclick="showPage('wprowadzenie')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('wprowadzenie')" aria-label="Wprowadzenie do dokumentacji">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-book-open"></i>
-                            </div>
-                            <h3>Wprowadzenie do dokumentacji</h3>
-                            <p>Podstawowe informacje o systemie HACCP i wymaganiach prawnych</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('opis-zakladu')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('opis-zakladu')" aria-label="Opis zakładu">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-building"></i>
-                            </div>
-                            <h3>Opis zakładu</h3>
-                            <p>Charakterystyka zakładu, lokalizacja, infrastruktura</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('ghp-gmp')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('ghp-gmp')" aria-label="Program GHP/GMP">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <h3>Program GHP/GMP</h3>
-                            <p>Dobre Praktyki Higieniczne i Produkcyjne</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('schemat')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('schemat')" aria-label="Schemat technologiczny">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-project-diagram"></i>
-                            </div>
-                            <h3>Schemat technologiczny</h3>
-                            <p>Proces produkcyjny i przepływ materiałów</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('analiza')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('analiza')" aria-label="Analiza zagrożeń HACCP">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-search-plus"></i>
-                            </div>
-                            <h3>Analiza zagrożeń HACCP</h3>
-                            <p>Identyfikacja i ocena zagrożeń w procesie</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('rejestry')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('rejestry')" aria-label="Rejestry i zapisy">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-clipboard-list"></i>
-                            </div>
-                            <h3>Rejestry i zapisy</h3>
-                            <p>Dokumentacja operacyjna i monitorowanie</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('korekty')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('korekty')" aria-label="Działania korygujące">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-tools"></i>
-                            </div>
-                            <h3>Działania korygujące</h3>
-                            <p>Procedury naprawcze i zapobiegawcze</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('szkolenia')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('szkolenia')" aria-label="Szkolenia pracowników">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-graduation-cap"></i>
-                            </div>
-                            <h3>Szkolenia pracowników</h3>
-                            <p>Program edukacyjny i certyfikacja</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('audyty')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('audyty')" aria-label="Audyty i weryfikacja">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-clipboard-check"></i>
-                            </div>
-                            <h3>Audyty i weryfikacja</h3>
-                            <p>Kontrola wewnętrzna i przeglądy systemu</p>
-                        </article>
-
-                        <article class="module-card" onclick="showPage('badania')" role="listitem" tabindex="0"
-                            onkeypress="if(event.key==='Enter')showPage('badania')" aria-label="Plan i rejestr badań">
-                            <div class="module-icon" aria-hidden="true">
-                                <i class="fas fa-flask"></i>
-                            </div>
-                            <h3>Plan i rejestr badań</h3>
-                            <p>Badania laboratoryjne i kontrola jakości</p>
-                        </article>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Content pages will be loaded here dynamically -->
-            <div id="content-container" aria-live="polite"></div>
-
-        </main>
-    </div>
-
-    <!-- Loading Indicator -->
-    <div id="loading-indicator" class="loading-indicator" style="display: none;" role="status" aria-live="polite">
-        <div class="spinner" aria-hidden="true"></div>
-        <p>Ładowanie...</p>
-    </div>
-
-    <!-- Import File Input (hidden) -->
-    <input type="file" id="import-file-input" accept=".json" style="display: none;"
-        onchange="handleImportFile(event)" aria-label="Wybierz plik do importu">
-
-    <!-- Modal Container -->
-    <div id="modal-overlay" class="modal-overlay" onclick="closeModalOnOverlay(event)" role="presentation">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <h3 id="modal-title">Tytuł</h3>
-                <button class="modal-close" onclick="closeModal()" aria-label="Zamknij okno">&times;</button>
-            </div>
-            <div class="modal-body" id="modal-body">
-                <!-- Dynamic content -->
-            </div>
-            <div class="modal-footer" id="modal-footer">
-                <!-- Dynamic buttons -->
-            </div>
+    <section class="card" aria-labelledby="chartTitle">
+      <div class="card-head">
+        <h2 id="chartTitle">Wykres</h2>
+        <div class="seg" role="group" aria-label="Wielkość na wykresie">
+          <button data-key="metric" data-val="weight">Waga</button>
+          <button data-key="metric" data-val="fat">Tłuszcz</button>
         </div>
+      </div>
+      <div class="chart-meta" id="chartMeta"></div>
+      <div class="chart" id="chart"></div>
+      <div class="seg wide" role="group" aria-label="Zakres czasu">
+        <button data-key="range" data-val="7">7 dni</button>
+        <button data-key="range" data-val="30">30 dni</button>
+        <button data-key="range" data-val="90">90 dni</button>
+        <button data-key="range" data-val="all">Wszystko</button>
+      </div>
+      <div class="mini" id="chartStats"></div>
+    </section>
+
+    <section class="card" aria-labelledby="logTitle">
+      <div class="card-head">
+        <h2 id="logTitle">Dziennik</h2>
+        <div class="seg" role="group" aria-label="Tabela">
+          <button data-key="tab" data-val="m">Pomiary</button>
+          <button data-key="tab" data-val="a">Aktywności</button>
+        </div>
+      </div>
+      <div class="log-summary" id="logSummary"></div>
+      <div class="table-wrap" id="table"></div>
+    </section>
+
+    <section class="card data-card" aria-labelledby="dataTitle">
+      <h2 id="dataTitle">Dane</h2>
+      <p class="muted">Wszystko zapisuje się lokalnie w tej przeglądarce. Zrób kopię, żeby nic nie zginęło.</p>
+      <div class="data-actions">
+        <button class="plain" id="exportBtn">Eksportuj kopię</button>
+        <button class="plain" id="importBtn">Importuj</button>
+        <button class="plain danger" id="resetBtn">Usuń wszystko</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="dock" aria-label="Szybkie akcje">
+    <div class="dock-inner">
+      <button class="btn primary" id="addM">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Dodaj pomiar
+      </button>
+      <button class="btn tinted" id="addA">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Dodaj aktywność
+      </button>
     </div>
+  </nav>
 
-    <!-- Reminders Panel -->
-    <div id="reminders-panel" class="reminders-panel" role="complementary" aria-label="Panel przypomnień">
-        <div class="reminders-panel-header">
-            <h3><i class="fas fa-bell"></i> Przypomnienia</h3>
-            <button class="reminders-panel-close" onclick="toggleRemindersPanel()" aria-label="Zamknij panel">&times;</button>
-        </div>
-        <div class="reminders-panel-actions">
-            <button class="btn btn-sm btn-primary" onclick="Reminders.showAddForm()">
-                <i class="fas fa-plus"></i> Nowe
-            </button>
-            <button class="btn btn-sm btn-secondary" onclick="Reminders.generateFromData()">
-                <i class="fas fa-magic"></i> Generuj
-            </button>
-        </div>
-        <div id="reminders-list" class="reminders-list">
-            <!-- Reminders will be loaded here -->
-        </div>
-    </div>
+  <dialog id="sheet" aria-labelledby="sheetTitle"></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
 
-    <!-- jsPDF Library for PDF Export -->
-    <!-- ⚡ Bolt: Added defer for non-blocking load while maintaining execution order -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-        integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- jsPDF AutoTable Plugin for PDF Tables -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"
-        integrity="sha512-1r5Jz/GQ9eFMoUxpLfhLZ0M2aQnXbKI3OBNlqDLbLfDYuHSU0kSeiFRrMSo8aNqk/pL7P3FXbT4wX7lZCibD7A=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-    <script type="module" src="./src/js/app.js"></script>
-
-    <!-- PWA Installation Script -->
-    <script>
-        // PWA Install Prompt
-        let deferredPrompt;
-        const installBanner = document.getElementById("install-banner");
-        const installButton = document.getElementById("install-button");
-        const dismissButton = document.getElementById("dismiss-install");
-
-        window.addEventListener("beforeinstallprompt", (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            if (installBanner) {
-                installBanner.style.display = "block";
-            }
-        });
-
-        if (installButton) {
-            installButton.addEventListener("click", async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log("[PWA] Install prompt outcome:", outcome);
-                    deferredPrompt = null;
-                    if (installBanner) {
-                        installBanner.style.display = "none";
-                    }
-                }
-            });
-        }
-
-        if (dismissButton) {
-            dismissButton.addEventListener("click", () => {
-                if (installBanner) {
-                    installBanner.style.display = "none";
-                }
-            });
-        }
-
-        // Track PWA installation
-        window.addEventListener("appinstalled", () => {
-            console.log("[PWA] App installed successfully");
-            if (installBanner) {
-                installBanner.style.display = "none";
-            }
-            deferredPrompt = null;
-        });
-    </script>
+  <script src="app.js" defer></script>
 </body>
 </html>
